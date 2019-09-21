@@ -4,6 +4,7 @@
 /prd/
 /refs/
 /node_modules/
+package-lock.json
 ykit.hosts
 .happypack
 .vscode/
