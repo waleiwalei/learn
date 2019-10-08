@@ -554,3 +554,6 @@ function accumulateDirectionalDispatches(inst, phase, event) {
 
 #### 参考文档
 [React事件机制](https://juejin.im/post/5d44e3745188255d5861d654)
+
+#### TODO
+[React事件机制 - 源码概览](https://juejin.im/post/5bd32493f265da0ae472cc8e)
