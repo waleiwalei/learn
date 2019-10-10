@@ -40,6 +40,7 @@
             2. 充当普通静态服务器,处理资源文件的请求
 
         **注意**
+        
             webpack正常打包和使用webpack-dev-server进行打包的区别是:
             - webpack打包每次会在项目生成一个bundle.js文件;
             - webpack-dev-server只会在初始启动后将打包文件结果放入内存中,在收到请求后将内存中的打包结果返回给浏览器
