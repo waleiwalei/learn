@@ -29,5 +29,25 @@
  * @return {boolean}
  */
 var uniqueOccurrences = function(arr) {
-    
+    let numObj = {};
+    arr.forEach((item, i) => {
+        if(numObj[item] != undefined) {
+            numObj[item]++;
+        } else {
+            numObj[item] = 1;
+        }
+    });
+    let existObj = {};
+    // {-3: 3, 0: 2, 1: 4, 10: 1}
+    for(let key in numObj) {
+        if(numObj[key] != undefined && existObj[numObj[key]]) {
+            return false;
+        } else {
+            existObj[numObj[key]] = 1;
+        }
+    }
+    return true;
 };
+
+// console.log(uniqueOccurrences([-3,0,1,-3,1,1,1,-3,10,0]))
+// console.log(uniqueOccurrences([1,2]))
