@@ -1,4 +1,5 @@
-
+/* 简单 */
+// LCP-1猜数字
 /* 
 小A 和 小B 在玩猜数字。小B 每次从 1, 2, 3 中随机选择一个，小A 每次也从 1, 2, 3 中选择一个猜。
 他们一共进行三次这个游戏，请返回 小A 猜对了几次？
@@ -20,7 +21,8 @@
 guess的长度 = 3
 answer的长度 = 3
 guess的元素取值为 {1, 2, 3} 之一。
-answer的元素取值为 {1, 2, 3} 之一。 */
+answer的元素取值为 {1, 2, 3} 之一。
+ */
 
 
 /**
@@ -28,6 +30,21 @@ answer的元素取值为 {1, 2, 3} 之一。 */
  * @param {number[]} answer
  * @return {number}
  */
+// var game = function(guess, answer) {
+//     let diffNumArr = guess.map((item, i) => (guess[i] - answer[i]));
+//     let numRet = 0;
+//     diffNumArr.forEach((item) => {
+//         item == 0 && numRet ++;
+//     });
+//     return numRet;
+// };
+
 var game = function(guess, answer) {
-    
+    let numRet = 0;
+    guess.forEach((item, i) => {
+        if(item-answer[i] == 0) {
+            numRet++;
+        }
+    });
+    return numRet;
 };
