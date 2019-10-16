@@ -236,9 +236,48 @@
         ```
         > 好处是"异步","非阻塞性"的,执行到require语句时不会停下来加载require的模块,而是会继续执行后边的代码,使得模块加载操作不会阻塞浏览器
         > 理念很好,但是代码更冗长,不清晰且容易造成回调地狱,实际中用的很少
-    - UMD
+    - UMD[Universal Module Definition(通用模块标准))]
+        ```js
+            // calculator.js
+            (function (global, main) {
+                // 根据当前环境采取不同的导出方式
+                if (typeof define === 'function' && define.amd) {
+                    // AMD 
+                    // 会首先判断当前环境有无define,如果需要,可更改判断的顺序
+                    define(...);
+                } else if (typeof exports === 'object') {
+                    // CommonJS
+                    module.exports = ...;
+                } else {
+                    // 非模块化环境
+                    global.add = ...;
+                }
+            }(this, function () {
+                // 定义模块主体
+                return {...}
+            }));
+        ```
     - npm模块
-
+        + npm/yarn使用方式不同,库通用
+        + npm init -y 初始化项目,生成package.json文件
+        + 使用
+            * 只需要npm install 就会安装到node_modules文件并更新package.json文件;
+            * 使用时import xxx from 'xxx';就会到node_modules文件夹查找;
+            * 每个包文件有一个入口文件[维护在package.json的main字段]
+                ```js
+                // lodash
+                // package.json
+                {
+                    "name": "lodash",
+                    "main": "lodash.js"
+                }
+                // -> 对应的import文件为node_modules/lodash/lodash.js
+                ```
+            * 通过打包所需资源减小打包体积[<package_name>/<path>]
+                ```js
+                import all from 'lodash/fp/all.js';
+                // webpack打包只会打包node_modules/lodash/fp/all.js,不会打包整个lodash库
+                ```
 * 模块打包原理
 
 
