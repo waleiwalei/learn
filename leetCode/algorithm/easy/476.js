@@ -23,5 +23,21 @@
  * @return {number}
  */
 var findComplement = function(num) {
-    
+    let numRet = 0;
+    let numArr = [];
+    function calEachNum(num) {
+        let equalNum = Math.floor(num/2); // 商
+        numArr.push(num - equalNum * 2);
+        if(equalNum) {
+            calEachNum(equalNum);
+        }
+    }
+    calEachNum(num);
+    numArr = numArr.map((item, i) => (1 - item));
+    numArr.forEach((item, i) => {
+        numRet += item * Math.pow(2, i);
+    });
+    return numRet;
 };
+
+// console.log(findComplement(1))
