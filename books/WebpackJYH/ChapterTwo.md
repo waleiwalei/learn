@@ -99,8 +99,8 @@
             ```
 + CommonJS/ES6模块
     * 动态/静态
-        - CJS的依赖关系是在运行时确定的,因此在代码执行之前,无法确定模块之间的依赖关系;
-        - ES6的依赖关系是在编译阶段确定,就不支持路径变量,且必须放在作用域顶层;
+        - CJS的依赖关系是在**运行**时确定的,因此在代码执行之前,无法确定模块之间的依赖关系;
+        - ES6的依赖关系是在**编译**阶段确定,就不支持路径变量,且必须放在作用域顶层;
         - ES6模块机制的优势
             1. 死代码检测和排除
             > 通过静态分析工具检测那些没有用过却被打包的代码,去掉这些“死代码”,减小打包体积
@@ -109,7 +109,10 @@
             3. 编译器优化
             > CJS导入的是整个对象,ES6支持直接导入变量,减少层级,提高代码效率
     * **值拷贝/动态映射**
+        [link](https://www.cnblogs.com/unclekeith/archive/2017/10/17/7679503.html)
+        [参考:对象采用浅复制]
         - CJS中的导入导出是“值拷贝”,导出的是一份副本[快照],无法同步体现模块内部的变化,但是可以更改这份副本,不会同步到原始模块
+        [参考:对象、基本值采用的都是只读引用]
         - ES6模块是“动态映射”,原始模块内部的变更会实时反映到导入的其他模块里,但是不能更改导入,会报错
     * 循环依赖
         - CJS
@@ -279,5 +282,72 @@
                 // webpack打包只会打包node_modules/lodash/fp/all.js,不会打包整个lodash库
                 ```
 * 模块打包原理
+    ```js
+    // 实际代码
+    // index.js
+    const calculator = require('./calculator.js');
+    const sum = calculator.add(2, 3);
+    console.log('sum', sum);
+
+    // calculator.js
+    module.exports = {
+        add: function(a, b) {
+            return a + b;
+        }
+    };
+    ```
+    > 经过webpack打包后的bundle代码:
+    ```js
+    // 立即执行匿名函数
+    (function(modules) {
+        //模块缓存
+        var installedModules = {};
+        // 实现require
+        // 这里粘贴了一下前文的函数实现
+        function __webpack_require__(moduleId) {
+            if(installedModules[moduleId]) {
+                return installedModules[moduleId].exports;
+            }
+            // Create a new module (and put it into the cache)
+            var module = installedModules[moduleId] = {
+                i: moduleId,
+                l: false,
+                exports: {}
+            };
+            ...
+        }
+        // 执行入口模块的加载
+        return __webpack_require__(__webpack_require__.s = 0);
+    })({
+        // modules：以key-value的形式储存所有被打包的模块
+        0: function(module, exports, __webpack_require__) {
+            // 打包入口
+            module.exports = __webpack_require__("3qiv");
+        },
+        "3qiv": function(module, exports, __webpack_require__) {
+            // index.js内容
+        },
+        jkzz: function(module, exports) {
+            // calculator.js 内容
+        }
+    });
+    ```
+    + bundle结构
+        - 最外层立即执行的匿名函数
+            > 包裹bundle,在全局环境创建自己的作用域
+        - __webpack_require__
+            > 实现模块导入
+        - installedModules
+            > 所有已经导入模块的缓存对象
+        - modules
+            > 以key-value的形式存储用到的所有模块,key: 一个id编号,hash值;value: 匿名函数包裹的模块内部实现,这个匿名函数的参数赋予了模块导入导出的能力(module, exports, __webpack_require__)
+    ----
+    + bundle如何运行
+        1. 匿名函数执行
+        2. 加载入口模块,每个bundle只有一个入口文件
+        3. 执行模块代码,遇到require,进入 __webpack_require__
+        4. __webpack_require__ 判断模块是否加载过,加载过直接返回,没有则回到步骤3. 
+        5. 所有模块加载完,回到入口文件,执行结束
+
 
 
