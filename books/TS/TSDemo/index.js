@@ -1,9 +1,10 @@
-function reverse(x) {
-    if (typeof x === 'number') {
-        return Number(x.toString().split('').reverse().join(''));
+(function () {
+    function createArray(length, value) {
+        var result = [];
+        for (var i = 0; i < length; i++) {
+            result[i] = value;
+        }
+        return result;
     }
-    else {
-        return x.split('').reverse().join('');
-    }
-}
-console.log(reverse({}));
+    console.log(createArray(3, 'test'));
+})();

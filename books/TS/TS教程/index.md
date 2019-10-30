@@ -1,4 +1,5 @@
 [ts教程补充]
+(url)[https://ts.xcatliu.com/]
 + 基本类型
     - void 
         > void声明的变量可以用undefined/null赋值
@@ -133,7 +134,7 @@
     1. package.json types/typing: ''
     2. index.d.ts
     3. package.json-main: xxx.d.ts
-+ something
++ @types/xxxx
     * @types/node 
         > nodejs不是内置对象一部分,在nodejs中使用ts需要引入第三方声明文件@types/node
     * @typescript-eslint/parser
@@ -142,6 +143,219 @@
         > 作为eslint规则的补充,提供一些适用ts的语法规则
 
 + eslint.js(json)
-    
+
++ type 类型别名、字符串字面量类型
++ 元组 
+```js
+let arr: [string, number] = ['str', 20];
+```
+
++ 枚举
+    - 枚举值可以是字符串,但要使用<any>类型断言省略ts的类型检测[下一个枚举项从这里得不到索引值,因此要有初始值]
+    ```js
+        enum myEnum {
+            Sun = <any>"sun",
+            Mon = 2,
+            Wed
+        }
+    ```
+    - 计算所得项[下一个也要给初始值]
+    ```js
+        enum myEnum {
+            Sun = "test".length,
+            Mon = 2,
+            Wed
+        }
+    ```
+    - 常数枚举
+        * 不能使用索引访问,只能通过字符串
+        * 会在编译阶段删除,转换为对应的枚举值
+        * 不能包含计算所得项
+
++ es7
+    - class- static静态方法
+        > 直接通过类调用
+    - public/protected/private 属性、方法
+        * public 允许子类访问及实例访问
+        * protected 允许子类访问,不允许实例访问
+        * private 只允许当前类访问
+    - public/protected/private 构造函数
+        * public 继承、实例化
+        * protected 只允许继承,不允许实例化
+        * private ----
+    - 构造函数参数使用ppp
+        > 相当于类中声明的属性
+    - readonly 只读属性[书写顺序在其他修饰符(eg:ppp)后面]
+
++ implements/接口interface
+    ```js
+    interface Alert {
+        alert()
+    }
+    class Door {}
+    class SecDoor extends Door implements Alert {
+        alert() {
+            console.log(111)
+        }
+    }
+    let secDoor = new SecDoor();
+    secDoor.alert();
+    ```
+    > 不同类之间的共性,抽取出来用implements实现
+    - 一个类可以实现多个接口
+    - 接口继承接口
+    ```js
+    interface Alarm {
+        alert();
+    }
+    interface LightableAlarm extends Alarm {
+        lightOn();
+        lightOff();
+    }
+    class Test implements LightableAlarm {
+        constructor() {}
+        alert() {console.log('alert')}
+        // lightOn() {console.log('lightOn')}
+        lightOff() {console.log('lightOff')}
+    }
+    let test = new Test();
+    test.alert();
+    ```
+    - 接口继承类
+    ```js
+    class Point {
+        x: number;
+        y: number;
+    }
+
+    interface Point3d extends Point {
+        z: number;
+    }
+
+    let point3d: Point3d = {x: 1, y: 2, z: 3};
+    ```
+    - [TODO:?]有时候,函数有自己的属性和方法
+    ```js
+    interface Counter {
+        (start: number): string;
+        interval: number;
+        reset(): void;
+    }
+
+    function getCounter(): Counter {
+        let counter = <Counter>function (start: number) { };
+        counter.interval = 123;
+        counter.reset = function () { };
+        return counter;
+    }
+
+    let c = getCounter();
+    c(10);
+    c.reset();
+    c.interval = 5.0;
+    ```
++ 泛型
+    - 泛型约束
+    ```js
+    interface argNum {
+        length: number
+    }
+    // T必须符合接口约束,即必须有length属性,否则会在编译时报错
+    function foo<T extends argNum>(arg: T) : T {
+
+    }
+    ```
+    - 接口定义函数形状
+    ```js
+    interface createArrayFunc {
+        (source: string, length: number): string
+    }
+    let createArray: createArrayFunc;
+    function createArray(source: string, length): string {}
+    ```
+    - 泛型接口定义函数形状
+    ```js
+    interface createArrayFunc {
+        <T>(source: T, length: number): T
+    }
+    let createArray: createArrayFunc;
+    function createArray<T>(source: T, length): T {}
+    ```
+    - 将泛型参数提到接口名
+    ```js
+    // 注意！！！这种方式使用泛型接口,需要定义泛型类型
+    interface createArrayFunc<T> {           ⬇️
+        (source: T, length: number): T       ⬇️
+    }                                        ⬇️
+    let createArray: createArrayFunc<any>; ⬅️⬇️
+    function createArray<T>(source: T, length): T {}
+    ```
+
+    - 泛型类
+    ```js
+    class GenericNumber<T> {
+        zeroValue: T;
+        add: (x: T, y: T) => T;
+    }
+
+    let myGenericNumber = new GenericNumber<number>();
+    myGenericNumber.zeroValue = 0;
+    myGenericNumber.add = function(x, y) { return x + y; };
+    ```
+
+    - 泛型参数默认值[从ts2.3开始,当没有指定参数或者从实际参数无法推测出时,使用默认参数类型值TODO:?]
+    ```js
+    function createArray<T = string>(length: number, value: T): Array<T> {
+        let result: T[] = [];
+        for (let i = 0; i < length; i++) {
+            result[i] = value;
+        }
+        return result;
+    }
+    ```
++ 声明合并
+    - 函数声明合并[函数重载]
+    - 接口声明合并
+    ```js
+    // 多次重复声明同一属性要注意类型保持一致,否则报错
+    interface Alarm {
+        price: number
+    }
+    interface Alarm {
+        weight: number
+    }
+    interface Alarm {
+        price: number;
+        weight: number;
+    }
+    ```
++ 有属性、方法的函数对应的接口
+    ```js
+    interface Counter {
+        (name: string) : string;
+        interval : number;
+        reset() : void;
+    }
+    <Counter>function (name: string){
+            return 2
+        };
+    function foo(): Counter {
+        let counter = <Counter>function (name: string){
+            return 2
+        };
+        counter.interval = 10;
+        counter.reset = function() {};
+        return counter;
+    }
+    let myFoo = foo();
+    myFoo('str');
+    myFoo.interval = 20;
+    myFoo.reset()
+    ```
+
+
+
+
+
      
 (书签)[https://ts.xcatliu.com/basics/declaration-files#shen-me-shi-sheng-ming-yu-ju]
