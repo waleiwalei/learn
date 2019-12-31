@@ -57,12 +57,28 @@ var numJewelsInStones = function(J, S) {
 //     return S.length - newS.length;
 // }
 
-// 两层循环,用filter+includes
+// 循环,用filter+includes
 // var numJewelsInStones = function(J, S) {
 //     let jarr = J.split("");
 //     let sarr = S.split("");
 //     return sarr.filter(item=>jarr.includes(item)).length
 // };
+
+// 正则match
+// var numJewelsInStones = function(J, S) {
+//     let nums = 0;
+//     for(let i =0,len = J.length;i<len;i++){
+//         let char = J.charAt(i)
+//         let reg = new RegExp(char,"gm")
+//         let res = S.match(reg)
+//         if(res){
+//         nums += res.length
+//         }
+//     }
+//     // console.log(nums)
+//     return nums
+// };
+    
 
 let J = "aA", S = "aAAbbbb";
 console.log(numJewelsInStones(J, S));

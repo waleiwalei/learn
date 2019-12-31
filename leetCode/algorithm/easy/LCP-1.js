@@ -42,7 +42,7 @@ answer的元素取值为 {1, 2, 3} 之一。
 var game = function(guess, answer) {
     let numRet = 0;
     guess.forEach((item, i) => {
-        if(item-answer[i] == 0) {
+        if(item===answer[i]) {
             numRet++;
         }
     });
