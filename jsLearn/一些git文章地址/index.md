@@ -1,0 +1,3 @@
+- https://github.com/Advanced-Frontend/Daily-Interview-Question/blob/master/datum/summary.md
+- https://github.com/xingbofeng/JavaScript-design-patterns
+- https://github.com/mqyqingfeng/Blog
