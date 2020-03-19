@@ -163,6 +163,236 @@ function delRepeat(arr) {
 }
 // indexOf去重、双层循环去重等
 
+// 8 事件循环
+// [link](https://zhuanlan.zhihu.com/p/33058983)
+/** 
+ * 作用域链的易遗漏知识点
+*/
+​(function() {
+
+console.log(typeof foo); // function pointer
+console.log(typeof bar); // undefined
+
+var foo = 'hello',
+bar = function() {
+return 'world';
+};
+
+function foo() {
+return 'hello';
+}
+
+}());​
+// foo类型为function不是因为function定义在后，而是因为，
+// [foo被声明了两次, 为什么foo展现出来的是functiton，而不是undefined或者string我们从创建阶段知道,尽管foo被声明了两次，函数在活动对象中是在变量之前被创建的，并且如果属性名在活动对象已经存在,我们会简单地绕过这个声明]
+
+/** 
+ * 浏览器环境下:
+ * 执行栈和事件队列
+ * [浏览器与Node的事件循环(Event Loop)有何区别?](https://juejin.im/post/5c337ae06fb9a049bc4cd218)
+ * 
+ * 浏览器常驻线程
+ * 1.GUI渲染线程 负责页面渲染 html/css解析 构建dom树 页面布局等；重绘或者回流时调用该线程；与js引擎线程互斥，当执行js引擎线程，GUI会被挂起直到js执行完
+ * 2.JS引擎线程 负责处理js脚本  执行代码;[包括异步回调或者定时器任务的执行]
+ * 3.定时器触发线程 主线程执行代码遇到setTimeout等会将定时器交给该线程 计时结束后 事件触发线程将回调加入事件队列等待js引擎线程执行
+ * 4.事件触发线程 将准备好的事件交给js引擎线程执行
+ * 5.异步http请求线程 主要负责处理异步请求 promise ajax等 异步请求有结果后 事件触发线程将回调加入事件队列 等待js引擎线程执行
+*/
+// demo - 浏览器
+Promise.resolve().then(()=>{
+    // micro1
+    console.log('Promise1') 
+    // macro2 
+    setTimeout(()=>{
+      console.log('setTimeout2')
+    },0)
+})
+setTimeout(()=>{
+    // macro1
+    console.log('setTimeout1')
+    // micro2
+    Promise.resolve().then(()=>{
+        console.log('Promise2')    
+    })
+},0)
+/** 
+ * 执行结果
+ * Promise1
+ * setTimeout1
+ * Promise2
+ * setTimeout2
+ * 
+ * 一开始执行栈的同步任务（这属于宏任务）执行完毕，会去查看是否有微任务队列，上题中存在(有且只有一个)，然后执行微任务队列中的所有任务输出Promise1，同时会生成一个宏任务 setTimeout2
+ * 然后去查看宏任务队列，宏任务 setTimeout1 在 setTimeout2 之前，先执行宏任务 setTimeout1，输出 setTimeout1
+ * 在执行宏任务setTimeout1时会生成微任务Promise2 ，放入微任务队列中，接着先去清空微任务队列中的所有任务，输出 Promise2
+ * 清空完微任务队列中的所有任务后，就又会去宏任务队列取一个，这回执行的是 setTimeout2
+*/
+
+// demo-nodejs
+console.log('start')
+setTimeout(() => {
+  console.log('timer1')
+  Promise.resolve().then(function() {
+    console.log('promise1')
+  })
+}, 0)
+setTimeout(() => {
+  console.log('timer2')
+  Promise.resolve().then(function() {
+    console.log('promise2')
+  })
+}, 0)
+Promise.resolve().then(function() {
+  console.log('promise3')
+})
+console.log('end')
+/** 
+ * 执行结果
+ * start
+ * end
+ * promise3 // *
+ * timer1
+ * timer2
+ * promise1
+ * promise2
+ * 
+ * 执行完同步任务后 先检测微任务 因此Promise3最先输出
+*/
+
+
+
+/** 
+ * Nodejs环境下:
+ * [简书-深入理解nodejs event loop机制](https://www.jianshu.com/p/2b34a257108d)
+ * [掘金](https://juejin.im/post/5af1413ef265da0b851cce80)
+ * 1. timer 事件循环第一阶段，检测有无过期timer，如果有，将回调压入timer任务队列等待执行
+ * 2. 可忽略的一个prepare阶段
+ * 3. poll (1)处理poll事件(2)已有超时timer，执行回调
+ *    直到队列为空或达到nodejs执行上限
+ * 接下来检测有无immediate：
+ *  (1) 有，执行
+ *  (2) 无，阻塞在此等待IO事件并会检测有无超时timer，如果有，开始下一轮事件循环，否则就会一直循环在此处，无法执行定时任务
+ * 4. check setImmediate回调会被加入immediate队列
+ * 5. close
+ * 
+ * 
+ * 总结：
+ * 事件循环的每个阶段都有一个执行队列
+ * 在每个阶段都会执行完任务队列直到清空或者达到系统上限
+ * 所有阶段顺序执行完后，称作事件循环完成一次tick
+*/
+// demo1
+fs.readFile('a.js', () => {
+    console.log('readFile');
+    setTimeout(() => {
+        console.log('timeout');
+    }, 0);
+    setImmediate(() => {
+        console.log('immediate');
+    });
+})
+/** 
+ * nodejs执行结果
+ * readFile
+ * immediate
+ * timeout
+ * 
+ * ???对于以上代码来说，setTimeout 可能执行在前，也可能执行在后。
+ * 首先 setTimeout(fn, 0) === setTimeout(fn, 1)，这是由源码决定的
+ * 进入事件循环也是需要成本的，如果在准备时候花费了大于 1ms 的时间，那么在 timer 阶段就会直接执行 setTimeout 回调
+ * 如果准备时间花费小于 1ms，那么就是 setImmediate 回调先执行了
+*/
+/** 
+ * 对比nodejs环境与浏览器环境
+ * 浏览器环境中的microtask在当次macrotask后执行
+ * nodejs环境中microtask在每个执行阶段后执行
+*/
+
+// demo2
+setTimeout(() => {
+    console.log('timeout1');
+    Promise.resolve().then(() => {
+        console.log('promise1');
+    })
+}, 0);
+setTimeout(() => {
+    console.log('timeout2');
+    Promise.resolve().then(() => {
+        console.log('promise2');
+    })
+}, 0);
+/** 
+ * 浏览器执行结果
+ * timeout1
+ * promise1
+ * timeout2
+ * promise2
+ * 
+ * nodejs执行结果[由于promise的then回调放在microtask中，因此在执行完当次timer队列中的两个timeout后，才执行microtask]
+ * ----- 1.node10及之前的版本
+ * timeout1
+ * timeout2
+ * promise1
+ * promise2
+ * 
+ * ----- 2.node11版本与浏览器执行结果一致
+ * 只要已进入一个宏任务，就会立刻执行微任务队列 // *****
+ * [node11 事件循环机制更改](https://juejin.im/post/5c3e8d90f265da614274218a)
+*/
+
+// setTimeout VS setImmediate
+/** 
+ * setImmediate 设计在poll阶段完成时执行，即check阶段；
+ * setTimeout 设计在poll阶段为空闲时，且设定时间到达后执行，但它在timer阶段执行
+*/
+
+
+// process.nextTick() VS setImmediate()
+/** i
+ * promise.nextTick 优先级 >> setImmediate
+ * nextTick一旦执行，就要等到队列清空，所以会造成IO饥饿
+ * [官方推荐使用setImmediate]
+*/
+// demo3
+const startTime = Date.now()
+let endTime
+fs.readFile('a.js', () => {
+    console.log('finish time', endTime - startTime)
+})
+let index = 0
+function handler() {
+    if(index++ > 1000) return
+    console.log('nextTick', index);
+    Process.nextTick(handler);
+
+    // console.log('setImmediate', index);
+    // setImmediate(handler);
+}
+
+handler()
+
+/** 
+ * process.nextTick
+ * nextTick 1
+ * nextTick 2
+ * ...
+ * nextTick 1000
+ * finish time
+ * 
+ * 
+ * setImmediate
+ * immediate 1
+ * ...
+ * finish time
+ * ...
+ * immediate 1000
+*/
+
+
+
+
+
+
 
 // ----- 10 http缓存 强缓存、协商缓存
 /**
