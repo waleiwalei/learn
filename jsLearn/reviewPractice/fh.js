@@ -18,7 +18,7 @@
       13,函数柯里化~
       14,rem解决方案~
       15,promise有几种状态？
-      16,webpack的工作流程
+      16,webpack的工作流程 [./webpack.js]
       17,postmessage通信~
       18,sessionStorage localStorage indexDB 区别和用法，记着localStorage的变更有事件可以监听~
 
@@ -60,40 +60,6 @@ function throttle(fn, time) {
 // https://www.cnblogs.com/rubylouvre/archive/2009/10/30/1593094.html
 
 // ------4 快速排序
-
-
-function quickSort(arr) {
-    let left = 0;
-    let right = arr.length - 1;
-    function sort(i, j) {
-        let index = i;
-        let sortItem = arr[i];
-        if(i > j) return;
-        while (i != j) {
-            while(i < j && arr[j] >= sortItem) {
-                j--;
-            }
-            while(i < j && arr[i] <= sortItem) {
-                i++;
-            }
-            if(i < j) {
-                let temp = arr[i];
-                arr[i] = arr[j];
-                arr[j] = temp;
-            }
-        }
-        let temp = arr[i];
-        arr[i] = arr[index];
-        arr[index] = temp;
-
-        sort(left, i - 1);
-        sort(i + 1, right);
-    }
-    for(let i = 0; i < arr.length; i ++) {
-        sort(left, right);
-    }
-}
-
 
 let a = [6, 1, 2, 5, 4, 7, 3, 9];
 function qS(left, right) {
@@ -538,6 +504,13 @@ console.log(num);
 // ----- 14 rem
 /** 
  * [link](https://www.jianshu.com/p/985d26b40199)
+*/
+
+
+// ----- 16 webpack的工作流程
+/** 
+ * [webpack工作流程](https://www.cnblogs.com/yxy99/p/5852987.html)
+ * [webpack浅析与实现](https://www.jianshu.com/p/97acc9a5ab42)
 */
 
 // ---- 17 postmessage
