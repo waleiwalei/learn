@@ -33,3 +33,25 @@
 
                 最终接收者是指初始（origin）服务器，或者第一个接收到 Max-Forwards 值为 0的请求的服务器
             ]
+        * 请求报文结构
+            1. 请求行
+                请求方法、url、http协议版本 （GET /xx/xx/xx.html http1.1）
+            2. 请求头 (常见如下)
+                - Accept 客户端支持的数据格式 或者说客户端希望收到的数据格式 但无论服务器返回什么结构 客户端都要接收 (eg: text/plain 文本阅读器 如果返回其他格式 则可能展示乱码)
+                - Accept-charset 浏览器支持的编码格式 （gbk/utf-8) [以一个浏览器测试，当使用gbk编码返回字节流，地址栏http请求不会乱码但是ajax请求返回会乱码，说明解析页面默认使用gbk；ajax解析默认使用utf-8]
+                - Accept-encoding 客户端支持的解码（解压缩）格式 （为了节省带宽 数据一般都会进行压缩 但是对用户透明 一般由服务器或代理完成）
+                - Accept-language 客户端支持的语言格式
+                - Referer 表示当前请求从哪个资源发起，或是请求的上一步地址
+                    + 可以用于统计各个不同来源的访问量
+                    + 防盗链 TODO:
+                - If-Modified-Since 客户端缓存文件时间 (与之对应的是服务端返回的Last-Modified字段)
+                    浏览器一般只对.html,.jpg,.css,.js等这些静态资源进行缓存，对于jsp页面以及ajax请求的动态结果，不缓存。服务器如Tomcat会自动给静态文件的响应报文添加“Last-Modified”字段，同时解析请求报文中的If-Modified-Since字段，这些都是对我们透明的。例如，我们将11.html改为11.jsp，那么浏览器将不会缓存页面内容，服务器每次都响应一个完整的页面内容给客户端，也不会在响应报文中添加“Last-Modified”字段
+                - If-None-Match 作用同上 该值为资源文件的hash值 （第一次响应报文头中存在ETag,下次请求头中会加入If-None-Match）
+                - Cache-control 控制客户端缓存机制 （public、private、no-cache、no- store、no-transform、must-revalidate、proxy-revalidate、max-age）TODO:
+                - User-Agent 客户端相关信息
+                - Host 主机地址+端口号
+                - Content-length 接受报文的总长度 可以根据这个计算百分比 展示进度条
+                - 
+
+            3. 空行
+            4. 请求数据
