@@ -49,9 +49,104 @@
                 - If-None-Match 作用同上 该值为资源文件的hash值 （第一次响应报文头中存在ETag,下次请求头中会加入If-None-Match）
                 - Cache-control 控制客户端缓存机制 （public、private、no-cache、no- store、no-transform、must-revalidate、proxy-revalidate、max-age）TODO:
                 - User-Agent 客户端相关信息
-                - Host 主机地址+端口号
-                - Content-length 接受报文的总长度 可以根据这个计算百分比 展示进度条
-                - 
+                - Host 主机地址+端口号/域名 [请求头Host](https://blog.csdn.net/netdxy/article/details/51195560)
+                    (如果服务器后台解析出Host但是服务器上找不到相应的站点，那么这个连接很可能会被丢弃，从而报错，但是客户端还在等待) 同一ip对应多个域名 可以通过host区分
 
-            3. 空行
-            4. 请求数据
+                - Content-length 接受报文的总长度 可以根据这个计算百分比 展示进度条
+                - Authorization 授权信息
+                - Pragma 仅用于客户端请求 Http1.1之前版本的遗留字段 标识所有中间服务器不可以返回缓存资源 如果所有中间服务器都支持Http1.1则可以直接使用Cache-control:no-cache 否则要同时使用Cache-control:no-cache Pragma:no-cache
+                - From 请求首部 From 中包含一个电子邮箱地址,这个电子邮箱地址属于发送请求的用户代理的实际掌控者的人类用户
+                - Range Range头可以请求实体的一个或者多个子范围
+                - Connection 见下
+            3. 空行 告知服务器 请求头到此结束
+            4. 请求数据 get X post 提交数据
+        * http响应报文结构
+            1. 响应行   
+                协议版本 状态码 描述 （HTTP 1.1 200 ok）
+            2. 响应头
+                - Content-Encoding
+                - Content-Length
+                - Content-Type 标识文档属于什么MIME类型 服务端默认为text/plain 一般需要改为text/html
+                - Date 当前GMT时间
+                - Expires 告诉浏览器缓存资源的过期时间 -1、0 不缓存
+                - Last-Modified 上次修改时间 （浏览器下次请求携带If-Modified-Since查询资源是否过期 返回200/304）
+                - Location 配合302使用 标识重定向到新的url
+                    [重定向会向服务器发送两次请求，加重服务器负担。地址栏会变。完成购买这样的操作要重定向，而不要用转发，不然刷新就会又买一次，客户会愤怒]
+                    ```js
+                        // 这样，当请求服务器的时候可以重定向到这个/day20131128/1.html文件
+                        response.setStatus(302);
+                        response.setHeader("location","/day20131128/1.html");
+                        //是上面两句的合成版。
+                        response.sendRedirect("/day20131128/1.html");
+                    ```
+                - Accept-Ranges: （eg:  Accept-Ranges:bytes） - 该响应头表明服务器支持Range请求,以及服务器所支持的单位是字节(这也是唯一可用的单位).我们还能知道:服务器支持断点续传,以及支持同时下载文件的多个部分,也就是说下载工具可以利用范围请求加速下载该文件.Accept-Ranges: none 响应头表示服务器不支持范围请求
+                - Refresh 服务器通知浏览器隔多长时间，刷新一次页面。比如聊天室。
+                - Server 告知浏览器服务器的类型 （eg: nginx）
+                - Set-Cookie 设置浏览器cookie
+                
+                * 缓存相关头字段优先级
+                [Cache-Control/Expires/Last-Modified/ETag] TODO:
+            3. 响应体 相应的消息体
+
+
+- Http connection
+    1. 短连接 short-lived connection http1.0 每个http请求都会进行tcp握手 tcp十分耗时[http1.1默认支持长连接，只有当connection为close时才会使用该方式]
+    2. 长连接 Persistent connection http1.1默认支持 长连接会保持一段时间，节省tcp握手时间 但是也不会一直保持，可使用keep-alive设置最小保持时间[也有缺点：保持连接也会消耗服务器资源，而且容易造成Dos-attacks攻击]
+    3. 流水线 HTTP pipelining 默认情况下 http请求顺序发出 下一次请求会在收到这次请求的应到后才会发出 可以利用两次请求在一个长连接上连续发出 不用等待应答 这样可能因为打到一个tcp包而优化性能
+
+- 状态码
+    + 1xx 此类状态代码表示请求已被接受并需要处理。这种类型的响应是一个临时响应，它只包含状态行和一些可选的响应头信息，并以空行结束。由于HTTP / 1.0协议中未定义1xx状态代码，因此服务器禁止向此类客户端发送1xx响应，除非在某些测试条件下
+    + 2xx 成功接收并已完成整个处理过程
+    + 3xx 重定向
+        * 301 永久移动
+        * 302 临时移动
+        * 304 自从上次请求 资源未修改
+        * 305 访问者应使用代理请求
+        * 307 POST请求的重定向？
+    + 4xx 客户端错误
+        * 403 服务器拒绝 权限不够
+        * 404 服务器找不到请求资源
+    + 5xx 服务端错误
+        * 500 服务器内部错误 无法完成请求
+        * 502 服务器作为网关和代理错误
+        * 504 网关超时
+
+- HTTPS
+    HTTP + SSL 在传输层和应用层之间对数据进行加密
+    SSL 安全套接层 TLS 传输层安全
+    [图解SSL/TLS](http://www.ruanyifeng.com/blog/2014/09/illustration-ssl.html)
+    1. Client ---------随机数C1,加密算法func-------------------> Server
+    2. Client <--------确认加密算法,数字证书(认证取得公钥),随机数--- SServer
+    3. Client ---------随机数C2,公钥加密C2---------------------> Server
+    4. Server私钥解密C2
+    5. Client/Server使用func(C1,C2,S)加密生成SessionKey [后续使用对称加密]
+
+- 客户端如何验证证书合法性
+    1. 先确认证书有效期，校验证书的网站域名与证书的颁发域名是否一致
+    2. 确认证书中的颁发机构CA与系统颁发机构CA进行对比
+    3. 如果没有 说明证书不可信
+    4. 如果有 取出其中的公钥 对签名进行解密
+    5. 使用同样的hash算法计算证书hash值与签名进行对比 确认合法性
+
+- 对称加密与非对称加密
+    + 对称加密：加密和解密使用的密钥是同一个。DES、AES
+
+    + 非对称加密：加密和解密使用的不同的密钥。RSA
+
+    + 摘要算法：MD5，SHA，hash算法不可逆
+- 中间人攻击
+    [客户端:C;服务器:S;中间人:A]
+    0. C发起访问请求,A拦截并向S发起访问请求
+    1. S向C发送公钥
+    2. A截获公钥PubKey,生成假的公钥发送给C
+    3. C使用假的公钥加密[会话秘钥Key]
+    4. A收到后使用自己的私钥解密得到会话秘钥Key
+    5. A用PubKey加密[假的会话秘钥Key2]传给服务器
+    6. 服务器使用自己的私钥解密得到Key2
+
+    + 解决: 在公钥中加入认证机构颁发的CA证书
+- TCP三次握手/四次挥手
+
+
+
+
