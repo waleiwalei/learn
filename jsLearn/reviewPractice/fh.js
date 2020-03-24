@@ -232,14 +232,15 @@ console.log('end')
  * [简书-深入理解nodejs event loop机制](https://www.jianshu.com/p/2b34a257108d)
  * [掘金](https://juejin.im/post/5af1413ef265da0b851cce80)
  * 1. timer 事件循环第一阶段，检测有无过期timer，如果有，将回调压入timer任务队列等待执行
- * 2. 可忽略的一个prepare阶段
- * 3. poll (1)处理poll事件(2)已有超时timer，执行回调
+ * 2. I/O回调
+ * 3. 可忽略的一个prepare阶段
+ * 4. poll (1)处理poll事件(2)已有超时timer，执行回调
  *    直到队列为空或达到nodejs执行上限
  * 接下来检测有无immediate：
  *  (1) 有，执行
  *  (2) 无，阻塞在此等待IO事件并会检测有无超时timer，如果有，开始下一轮事件循环，否则就会一直循环在此处，无法执行定时任务
- * 4. check setImmediate回调会被加入immediate队列
- * 5. close
+ * 5. check setImmediate回调会被加入immediate队列
+ * 6. close
  * 
  * 
  * 总结：
@@ -263,8 +264,8 @@ fs.readFile('a.js', () => {
  * immediate
  * timeout
  * 
- * ???对于以上代码来说，setTimeout 可能执行在前，也可能执行在后。
- * 首先 setTimeout(fn, 0) === setTimeout(fn, 1)，这是由源码决定的
+ * 对于以上代码来说，setTimeout 可能执行在前，也可能执行在后。
+ * 首先 setTimeout(fn, 0) === setTimeout(fn, 4)，这是由源码决定的
  * 进入事件循环也是需要成本的，如果在准备时候花费了大于 1ms 的时间，那么在 timer 阶段就会直接执行 setTimeout 回调
  * 如果准备时间花费小于 1ms，那么就是 setImmediate 回调先执行了
 */
@@ -328,6 +329,7 @@ fs.readFile('a.js', () => {
 let index = 0
 function handler() {
     if(index++ > 1000) return
+
     console.log('nextTick', index);
     Process.nextTick(handler);
 
@@ -354,6 +356,39 @@ handler()
  * immediate 1000
 */
 
+
+// demo4 process.nextTick VS promise.then
+console.log('start')
+setTimeout(() => {
+  console.log('timer1')
+  Promise.resolve().then(function() {
+    console.log('promise1')
+  })
+}, 0)
+setTimeout(() => {
+  console.log('timer2')
+  Promise.resolve().then(function() {
+    console.log('promise2')
+  });
+  process.nextTick(()=>{
+      console.log('nextTick');
+  })
+}, 0)
+Promise.resolve().then(function() {
+  console.log('promise3')
+})
+console.log('end')
+/** 
+ * 输出结果
+ * start
+ * end
+ * promise3
+ * timer1
+ * promise1
+ * timer2
+ * nextTick
+ * promise2
+*/
 
 
 
