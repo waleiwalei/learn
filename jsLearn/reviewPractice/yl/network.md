@@ -193,7 +193,6 @@
                 4. 快恢复
                     重传结束后，此时的cwdn为新的ssthresh，降cwdn为现在的一半，重新开始拥塞避免阶段重复此过程
                 -----
-                - ssthresh 慢启动阈值
                 - cwdn < ssthresh: 慢启动;
                   cwdn > ssthresh: 拥塞避免;
                   cwdn > ssthresh: 任意
@@ -318,7 +317,10 @@
 [UDP首部字段](https://zhuanlan.zhihu.com/p/94415455)
 - 三次握手过程中有哪些不安全性
 [三次握手过程中有哪些不安全性](https://www.cnblogs.com/taoshihan/p/11215329.html)
-
+- HTTP劫持 && DNS劫持
+    [http劫持](https://zhuanlan.zhihu.com/p/31344484)
+    + http劫持 劫持请求并篡改响应内容
+    + dns劫持 修改域名对应的ip地址
 
 
 
