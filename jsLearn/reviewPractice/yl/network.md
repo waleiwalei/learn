@@ -165,10 +165,11 @@
         [link](https://www.jianshu.com/p/eb50d2152646)
         1. 三次握手
             + TCP规定，SYN报文不携带数据，但是需要消耗序号
-            + TCP规定，ACK可以携带数据，不携带数据则不消耗序号
-                1. Client ----------------SYN=1 seq=J--------------> Server
-                2. Client <--------SYN=1 ACK=1 seq=K ack=J+1-------- Server
-                3. Client -----------SYN=1 seq=K+1 ack=K+1---------> Server
+            + TCP规定，ACK可以携带数据，不携带数据则不消耗序
+            ------
+            1. Client ----------------SYN=1 seq=J--------------> Server
+            2. Client <--------SYN=1 ACK=1 seq=K ack=J+1-------- Server
+            3. Client -----------SYN=1 seq=K+1 ack=K+1---------> Server
         2. 四次挥手
 
     * UDP 使用场景
