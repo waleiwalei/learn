@@ -245,7 +245,9 @@
     + 转发是服务器端行为，将请求转到同web下其他url
     + 重定向是服务器返回302给用户并告知新的url 浏览器地址栏变更 回退按钮会点亮 用户再次发起请求[至少发起两次请求]
 - 缓存
+
 - 跨域
+
 - XSS/CSRF
     [前端安全：XSS与CSRF](https://zhuanlan.zhihu.com/p/31553667)
     + XSS[Cross Site Scripting跨站脚本攻击] 
@@ -334,7 +336,8 @@
     [http劫持](https://zhuanlan.zhihu.com/p/31344484)
     + http劫持 劫持请求并篡改响应内容
     + dns劫持 修改域名对应的ip地址
-
+- JSONP跨域
+    [link](https://segmentfault.com/a/1190000007665361?utm_source=tag-newest)
 - Transfer-Encoding (https://imququ.com/post/transfer-encoding-header-in-http.html)
 
 

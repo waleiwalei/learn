@@ -1,83 +1,94 @@
-let obj = {
-    age: 20,
-    info: function() {
-        return () => {
-            console.log(this.age)
-        }
-    }
+import { Menu, Switch } from 'antd';
+import { MailOutlined, AppstoreOutlined, SettingOutlined } from '@ant-design/icons';
+
+const { SubMenu } = Menu;
+
+class Sider extends React.Component {
+  state = {
+    theme: 'dark',
+    current: '1',
+  };
+
+  changeTheme = value => {
+    this.setState({
+      theme: value ? 'dark' : 'light',
+    });
+  };
+
+  handleClick = e => {
+    console.log('click ', e);
+    this.setState({
+      current: e.key,
+    });
+  };
+
+  render() {
+    return (
+      <div>
+        <Switch
+          checked={this.state.theme === 'dark'}
+          onChange={this.changeTheme}
+          checkedChildren="Dark"
+          unCheckedChildren="Light"
+        />
+        <br />
+        <br />
+        <Menu
+          theme={this.state.theme}
+          onClick={this.handleClick}
+          style={{ width: 256 }}
+          defaultOpenKeys={['sub1']}
+          selectedKeys={[this.state.current]}
+          mode="inline"
+        >
+          <SubMenu
+            key="sub1"
+            title={
+              <span>
+                <MailOutlined />
+                <span>Navigation One</span>
+              </span>
+            }
+          >
+            <Menu.Item key="1">Option 1</Menu.Item>
+            <Menu.Item key="2">Option 2</Menu.Item>
+            <Menu.Item key="3">Option 3</Menu.Item>
+            <Menu.Item key="4">Option 4</Menu.Item>
+          </SubMenu>
+          <SubMenu
+            key="sub2"
+            title={
+              <span>
+                <AppstoreOutlined />
+                <span>Navigation Two</span>
+              </span>
+            }
+          >
+            <Menu.Item key="5">Option 5</Menu.Item>
+            <Menu.Item key="6">Option 6</Menu.Item>
+            <SubMenu key="sub3" title="Submenu">
+              <Menu.Item key="7">Option 7</Menu.Item>
+              <Menu.Item key="8">Option 8</Menu.Item>
+            </SubMenu>
+          </SubMenu>
+          <SubMenu
+            key="sub4"
+            title={
+              <span>
+                <SettingOutlined />
+                <span>Navigation Three</span>
+              </span>
+            }
+          >
+            <Menu.Item key="9">Option 9</Menu.Item>
+            <Menu.Item key="10">Option 10</Menu.Item>
+            <Menu.Item key="11">Option 11</Menu.Item>
+            <Menu.Item key="12">Option 12</Menu.Item>
+          </SubMenu>
+        </Menu>
+      </div>
+    );
+  }
 }
-let person = {age: 28}
-let info = obj.info();
-info();     // 20
-let info2 = obj.info.call(person)
-info2();    // 28
 
-
-// function A() {
-
-// }
-// A.prototype.x = 10;
-// var a1 = new A();
-// console.log(a1.x);
-
-// A.prototype = {
-//     x: 20
-// }
-// console.log(a1.x);
-// var a2 = new A()
-// console.log(a2.x);
-
-
-// function Person(){}
-
-// var person = new Person();
-
-// person.name = 'Daisy';
-// console.log(person.name) 
-// delete person.name;
-// console.log(person.name)
-
-
-// setTimeout(()=>{
-//     console.log('timer1')
-//     Promise.resolve().then(function() {
-//         console.log('promise1')
-//     })
-// }, 0)
-// setTimeout(()=>{
-//     console.log('timer2')
-//     Promise.resolve().then(function() {
-//         console.log('promise2')
-//     })
-// }, 0)
-
-// fs.readFile(()=>{
-//     setTimeout(() => {
-//         console.log('timeout');
-//     }, 0);
-//     setImmediate(() => {
-//         console.log('immediate');
-//     });
-// })
-
-
-// console.log('start')
-// setTimeout(() => {
-//   console.log('timer1')
-//   Promise.resolve().then(function() {
-//     console.log('promise1')
-//   })
-// }, 0)
-// setTimeout(() => {
-//   console.log('timer2')
-//   Promise.resolve().then(function() {
-//     console.log('promise2')
-//   });
-//   process.nextTick(()=>{
-//       console.log('nextTick');
-//   })
-// }, 0)
-// Promise.resolve().then(function() {
-//   console.log('promise3')
-// })
-// console.log('end')
+ReactDOM.render(<Sider />, mountNode);
