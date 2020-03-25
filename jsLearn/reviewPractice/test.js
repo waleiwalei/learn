@@ -1,15 +1,41 @@
-function Person() {
-
+let obj = {
+    age: 20,
+    info: function() {
+        return () => {
+            console.log(this.age)
+        }
+    }
 }
+let person = {age: 28}
+let info = obj.info();
+info();     // 20
+let info2 = obj.info.call(person)
+info2();    // 28
 
-Person.prototype.name = 'Kevin';
 
-var person = new Person();
+// function A() {
 
-person.name = 'Daisy';
-console.log(person.name) 
-delete person.name;
-console.log(person.name)
+// }
+// A.prototype.x = 10;
+// var a1 = new A();
+// console.log(a1.x);
+
+// A.prototype = {
+//     x: 20
+// }
+// console.log(a1.x);
+// var a2 = new A()
+// console.log(a2.x);
+
+
+// function Person(){}
+
+// var person = new Person();
+
+// person.name = 'Daisy';
+// console.log(person.name) 
+// delete person.name;
+// console.log(person.name)
 
 
 // setTimeout(()=>{

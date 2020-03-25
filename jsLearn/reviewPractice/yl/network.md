@@ -171,6 +171,19 @@
             2. Client <--------SYN=1 ACK=1 seq=K ack=J+1-------- Server
             3. Client -----------SYN=1 seq=K+1 ack=K+1---------> Server
         2. 四次挥手
+            + TCP规定，FIN报文不携带数据，但是需要消耗序号
+            ------
+            1. Client ----------FIN=1 seq=u------------> Server
+            2. Client <---------ACK=1 seq=v ack=u+1----  Server
+            3. (Client <---------transferring------------ Server)
+            4. Client <----FIN=1 ACK=1 seq=w/(v+1?) ack=u+1--- Server
+            5. Client -----ACK=1 seq=u+1 ack=w+1-------> Server
+        3. 为什么需要四次挥手
+            - 步骤1结束后，服务器进入FIN-WAIT-1等待状态，步骤1+2只是表示客户端方向已经结束了数据传输，但是服务器端可能还需要继续传输给数据，而且客户端必须接收，因此2结束后，客户端进入FIN-WAIT-2等待状态，服务器如果有数据，可以继续传输，传输结束后，服务器发起传输结束标识，客户端接收该结束标识并等待2MSL的时间后，结束该次TCP连接，服务端则是在接收到客户端发送的最后一次请求后便立刻结束当次TCP连接（因此TCP更早结束）
+        4. 为什么需要等待2MSL时间后客户端再结束
+            [MSL:报文最长寿命，最大生存时间]
+            - 由于最后一次客户端反馈的接收结束消息可能丢失，导致服务器一直等待，因此客户端等待2MSL时间还没有收到服务器重传的上一个消息，即表示服务器正常收到了结束通知，才可以结束
+            - 等待2MSL时间后，当次连接网络上的所有消息都失效，不会在下次TCP连接中收到旧的包
 
     * UDP 使用场景
         + ping命令就是发送数据包？？？
@@ -321,6 +334,8 @@
     [http劫持](https://zhuanlan.zhihu.com/p/31344484)
     + http劫持 劫持请求并篡改响应内容
     + dns劫持 修改域名对应的ip地址
+
+- Transfer-Encoding (https://imququ.com/post/transfer-encoding-header-in-http.html)
 
 
 
