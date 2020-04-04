@@ -225,20 +225,18 @@ console.log('end')
  * 执行完同步任务后 先检测微任务 因此Promise3最先输出
 */
 
-
-
 /** 
  * Nodejs环境下:
  * [简书-深入理解nodejs event loop机制](https://www.jianshu.com/p/2b34a257108d)
  * [掘金](https://juejin.im/post/5af1413ef265da0b851cce80)
  * 1. timer 事件循环第一阶段，检测有无过期timer，如果有，将回调压入timer任务队列等待执行
- * 2. I/O回调
+ * 2. I/O回调 IO的回调，大部分是操作系统的回调
  * 3. 可忽略的一个prepare阶段
  * 4. poll (1)处理poll事件(2)已有超时timer，执行回调
  *    直到队列为空或达到nodejs执行上限
  * 接下来检测有无immediate：
  *  (1) 有，执行
- *  (2) 无，阻塞在此等待IO事件并会检测有无超时timer，如果有，开始下一轮事件循环，否则就会一直循环在此处，无法执行定时任务
+ *  (2) 无，阻塞在此等待IO事件并会检测有无超时timer，如果有，开始下一轮事件循环，【检测timer的作用：否则就会一直循环在此处，无法执行定时任务】
  * 5. check setImmediate回调会被加入immediate队列
  * 6. close
  * 
@@ -434,7 +432,7 @@ console.log('end')
 // ----- 11 for-in for-of forEach map
 /** 
  * for-in 遍历对象数组，遍历出属性名，但是会把数组自定义属性以及对象原型属性遍历出来啊（需要配合hasOwnProperty）
- * for-of 遍历对象，遍历出属性值
+ * for-of 遍历数组，遍历出属性值
  * forEach 同for作用一致，而且没法中途退出循环
  * map 可以返回一个新数组，数组元素为每次循环的返回值
 */

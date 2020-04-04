@@ -247,7 +247,139 @@
 - 缓存
 
 - 跨域
+    1. cors
+    2. nginx反向代理
+    3. node代理
+    4. window.name+iframe [postMessage]
+    5. jsonp （只支持get方法）[<script src="http://jsonp.js?callback=xxx"></script>]
+        ```js
+            // 简单jsonp-1
+            function jsonp(req){
+                var script = document.createElement('script');
+                var url = req.url + '?callback=' + req.callback.name;
+                script.src = url;
+                document.getElementsByTagName('head')[0].appendChild(script); 
+            }
 
+            // node
+            var http = require('http');
+            var urllib = require('url');
+
+            var port = 8080;
+            var data = {'data':'world'};
+
+            http.createServer(function(req,res){
+                var params = urllib.parse(req.url,true);
+                if(params.query.callback){
+                    console.log(params.query.callback);
+                    //jsonp
+                    var str = params.query.callback + '(' + JSON.stringify(data) + ')';
+                    res.end(str);
+                } else {
+                    res.end();
+                }
+                
+            }).listen(port,function(){
+                console.log('jsonp server is on');
+            });
+
+            // promise jsonp-2
+            function jsonp({url, params, callback}) {
+                return new Promise((resolve, reject) => {
+                    let script = document.createElement('script');
+                    window[callback] = function(data) {
+                        resolve(data);
+                        document.body.removeChild(script);
+                    }
+                    params = {...params, callback}
+                    let arrs = [];
+                    for (let key in params) {
+                        arrs.push(`${key}=${params[key]}`);
+                    }
+                    script.src = `${url}?${arrs.join('&')}`;
+                    document.body.appendChild(script);
+                });
+            }
+            function show(data) {
+                console.log(data);
+            }
+            jsonp({
+                url: 'xxxx',
+                params: {
+                    // ...
+                },
+                callback: 'show'
+            }).then(data => {
+                console.log(data);
+            })
+
+        ```
+
+- 手写ajax
+    ```js
+        var xhr;
+        var url = '/query';
+        var postData = JSON.stringify({a:1,b:2});
+        if (window.XMLHttpRequest) {
+            xhr = new XMLHttpRequest();
+        } else {
+            xhr = new ActiveXObject('Microsoft.XMLHTTP');
+        }
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                // success;
+            } else {
+                // some error
+            }
+        }
+        xhr.open('POST', url, true);
+        // xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
+        // xhr.withCredentials = true;  // 携带跨域cookie
+        xhr.send(postData);
+
+        // +promise
+        function _xhr() {
+            return new Promise(function (resolve, reject) {
+                xhr.open(method, url, async)
+                xhr.onloadend = function() {
+                    if (xhr.status === 200) {
+                        resolve(xhr)
+                    } else {
+                        reject({
+                            errorType: 'status',
+                            xhr: xhr
+                        })
+                    }
+                }
+                xhr.ontimeout = function() {
+                    reject({
+                        errorType: 'timeout',
+                        xhr: xhr
+                    })
+                }
+                xhr.onerror = function() {
+                    reject({
+                        errorType: 'error',
+                        xhr: xhr
+                    })
+                }
+                xhr.onabort = function() {
+                    reject({
+                        errorType: 'abort',
+                        xhr: xhr
+                    })
+                }
+                try {
+                    xhr.send(data)
+                } catch (error) {
+                    reject({
+                        errorType: 'send',
+                        error: error
+                    })
+                }
+            })
+        }
+    ```
 - XSS/CSRF
     [前端安全：XSS与CSRF](https://zhuanlan.zhihu.com/p/31553667)
     + XSS[Cross Site Scripting跨站脚本攻击] 
