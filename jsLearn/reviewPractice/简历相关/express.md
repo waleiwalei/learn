@@ -145,3 +145,58 @@ function unsign(str, secret) {
     return sha1(str) === sha1(res) ? str : false;
 }
 ```
+
+- 补充[bodyParser]
+    ```js
+    // 当xhr请求头Content-Type: application/x-www-form-urlencoded
+    var app = require('express')();
+    var bodyParser = require('bodyParser');
+    app.use(bodyParser.urlencoded({extended: false}));
+
+    // 当请求头Content-Type: application/json
+    var app = require('express')();
+    var bodyParser = require('bodyParser');
+    app.use(bodyParser.json());
+    ```
+    + 4.x不再使用bodyParser 直接用express即可
+    ```js
+    var express = require('express');
+    var app = express();
+    express.use(express.json());
+    express.use(express.urlencoded({extended: false}));
+    ```
+    + json()/urlencoded()
+        * json用于file类型
+        * urlencoded用于表单类型
+    + extended: true/false
+        * true 返回对象的[值]可以为任意类型
+        * false 返回对象的[值]只能为String/Array
+    ```js
+    var express = require('express')
+    var path = require('path')
+    var bodyParser = require('body-parser')
+    var app = express()
+    app.use(bodyParser.urlencoded({ extended: true }))
+    // -> 结果
+    { 
+        movie: { 
+            _id: 'undefined',
+            title: '电影名称11121',
+            poster: 'http://r3.ykimg.com/05160000530EEB63675839160D0B79D5'
+        } 
+    }
+
+    var express = require('express')
+    var path = require('path')
+    var bodyParser = require('body-parser')
+    var app = express()
+    app.use(bodyParser.urlencoded({ extended: false }))
+    // -> 结果
+    { 
+        'movie[_id]': 'undefined',
+        'movie[title]': '电影名称11121',
+        'movie[poster]': 'http://r3.ykimg.com/05160000530EEB63675839160D0B79D5'
+    }
+
+    ```
+    
