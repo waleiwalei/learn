@@ -190,7 +190,7 @@ function applyMiddleware(...middlewares) {
     }
     
     // 中间件实例
-    // 中间件最终返回的是一个reduer函数,接受action,返回新的state
+    // 中间件最终返回的是一个reducer函数,接受action,返回新的state
     const logger = store => next => action => {
         console.log('dispatching', action)
         let result = next(action)

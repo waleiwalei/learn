@@ -16,16 +16,20 @@ arr[5]()
 
 // 01 闭包
 function foo(i) {
-    return i;
+    return function() {
+      return i;
+    }
 }
 for (var i = 0; i < 10; i++) {
-    arr[i] = foo(i);
+    arr[i] = foo(i)();
 }
 
 // 02 IIFE
 for (var i = 0; i < 10; i++) {
     arr[i] = (function(i){
-        return i;
+        return function(){
+          return i
+        }
     })(i);
 }
 

@@ -431,7 +431,8 @@ console.log('end')
 
 // ----- 11 for-in for-of forEach map
 /** 
- * for-in 遍历对象数组，遍历出属性名，但是会把数组自定义属性以及对象原型属性遍历出来啊（需要配合hasOwnProperty）
+ * for-in 遍历对象数组，遍历出属性名，
+ *      但是会把数组自定义属性以及对象原型属性遍历出来（需要配合hasOwnProperty）
  * for-of 遍历数组，遍历出属性值
  * forEach 同for作用一致，而且没法中途退出循环
  * map 可以返回一个新数组，数组元素为每次循环的返回值
@@ -449,9 +450,9 @@ console.log('end')
 */
 
 
-// ----- 13 函数珂里化
+// ----- 13 函数柯里化
 /** 
- * [知乎-js函数珂里化](https://zhuanlan.zhihu.com/p/31271179)
+ * [知乎-js函数柯里化](https://zhuanlan.zhihu.com/p/31271179)
  * 概念：值传递一部分参数给他，让他返回一个函数，去处理剩下的参数
  * [“将一个多参数函数转换为只接受一个参数的函数并返回接受剩余参数且可以返回正确结果的函数的过程“]
  * 偏函数：一个减少函数参数个数的过程
@@ -467,14 +468,14 @@ var x = double(3);  // 6
 var y = double(4);  // 8
 // 当一个较为通用的函数某个参数可以固定，且想要获取该函数的变体
 
-// [张鑫旭-珂里化](https://www.zhangxinxu.com/wordpress/2013/02/js-currying/)
-/**  珂里化的三个作用
+// [张鑫旭-柯里化](https://www.zhangxinxu.com/wordpress/2013/02/js-currying/)
+/**  柯里化的三个作用
  * 1.参数复用 [可以直接复用外层函数固定的参数]
  * 2.提前返回
  * 3.延迟计算
 */
 // 2.--提前返回
-// -- 珂里化之前
+// -- 柯里化之前
 var addEvent = function(el, type, fn, capture) {
     if (window.addEventListener) {
         el.addEventListener(type, function(e) {
@@ -486,7 +487,7 @@ var addEvent = function(el, type, fn, capture) {
         });
     } 
 };
-// -- 珂里化之后
+// -- 柯里化之后
 var addEvent = (function(){
     if (window.addEventListener) {
         return function(el, sType, fn, capture) {
@@ -502,7 +503,7 @@ var addEvent = (function(){
         };
     }
 })();
-// 3.--珂里化之前
+// 3.--柯里化之前
 var fishWeight = 0;
 var addWeight = function(weight) {
     fishWeight += weight;
@@ -514,7 +515,7 @@ addWeight(1.2);
 addWeight(2.5);
 
 console.log(fishWeight);   // 12.5
-// --珂里化之后
+// --柯里化之后
 function curringAdd(fn) {
     var args = [].slice.call(arguments, 1);
     return function() {

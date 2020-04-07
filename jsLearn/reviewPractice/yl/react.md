@@ -39,7 +39,7 @@
     + redux-saga
         > redux-thunk 和 redux-promise，当然 redux 的异步中间件还有很多，他们可以处理大部分场景，这些中间件的思想基本上都是把异步请求部分放在了 action creator 中，理解起来比较简单。
 
-        > redux-saga 采用了另外一种思路，它没有把异步操作放在 action creator 中，也没有去处理 reductor，而是把所有的异步操作看成“线程”，可以通过普通的action去触发它，当操作完成时也会触发action作为输出。saga 的意思本来就是一连串的事件。
+        > redux-saga 采用了另外一种思路，它没有把异步操作放在 action creator 中，也没有去处理 reducer，而是把所有的异步操作看成“线程”，可以通过普通的action去触发它，当操作完成时也会触发action作为输出。saga 的意思本来就是一连串的事件。
 
         > redux-saga 把异步获取数据这类的操作都叫做副作用（Side Effect），它的目标就是把这些副作用管理好，让他们执行更高效，测试更简单，在处理故障时更容易
             [文档](https://redux-saga-in-chinese.js.org/)
@@ -48,9 +48,17 @@
     + dva
         > redux、react-redux、redux-saga 之类的概念，大家肯定觉得头昏脑涨的，什么 action、reducer、saga 之类的，写一个功能要在这些js文件里面不停的切换。
 
-        >dva 做的事情很简单，就是让这些东西可以写到一起，不用分开来写了
+        >dva 做的事情很简单，就是让这些东西可以写到一起，不用分开来写了 产生了一个model的概念
         > subscriptions TODO:
             用于收集其他来源的 action，比如快捷键操作
+    + redux源码解读 见../../reactLearn/reduxLearn
+        **一个tip**
+        * 在combineReducer中,调用对应reducer后,hasChanged字段的判断条件是 
+            ```js
+            // 这样，就会导致简单类型的值改变不会触发重新render
+            hasChanged = hasChanged || newStateValue !== state[key] 
+            return hasChanged ? newState : state;
+            ```
 
 - React生命周期有哪些，16版本生命周期发生了哪些变化？
     + 15:
