@@ -3,8 +3,6 @@
 [程墨-面试react常见问题](https://zhuanlan.zhihu.com/p/28176065)
 - 受控组件&&非受控组件
     受控组件数据源为store；非受控组件使用ref，就像常规获取dom节点数据一样
-- React fiber 
-    [st](https://zhuanlan.zhihu.com/p/37095662)
 - 如何理解虚拟DOM
     [link](https://www.zhihu.com/question/29504639)
     [虚拟dom原理](https://juejin.im/post/5cb66fdaf265da0384128445)
@@ -22,7 +20,7 @@
     + 当需要对dom进行事件监听时，也先通过虚拟dom，代理真实dom事件进行监听
     + 目的：
         > 使用React，你只需要告诉React你想让视图处于什么状态，React则通过VitrualDom确保DOM与该状态相匹配。你不必自己去完成属性操作、事件处理、DOM更新，React会替你完成这一切
-- redux/dva/saga/mobx/flux...
+- redux/dva/saga/mobx/flux...(react-redux的connect做了什么)
     [link](https://zhuanlan.zhihu.com/p/53599723)
     > Flux 要求，View 要想修改 Store，必须经过一套流程，有点像我们刚才 Store 模式里面说的那样。视图先要告诉 Dispatcher，让 Dispatcher dispatch 一个 action，Dispatcher 就像是个中转站，收到 View 发出的 action，然后转发给 Store。比如新建一个用户，View 会发出一个叫 addUser 的 action 通过 Dispatcher 来转发，Dispatcher 会把 addUser 这个 action 发给所有的 store，store 就会触发 addUser 这个 action，来更新数据。数据一更新，那么 View 也就跟着更新了[**Dispatcher的作用是接收所有的Action，然后发给所有的 Store**]
     + Flux的最大特点就是数据都是单向流动的
@@ -34,6 +32,9 @@
     + redux将react分为容器形组件、展示型组件
     + react-redux [connect/Provider/mapStateToProps/mapDispatchToProps]
         > 简单来说，react-redux 就是多了个 connect 方法连接容器组件和UI组件，这里的“连接”就是一种映射： mapStateToProps 把容器组件的 state 映射到UI组件的 props mapDispatchToProps 把UI组件的事件映射到 dispatch 方法
+        * connect TODO:
+            [link](https://yq.aliyun.com/articles/59428)
+            [link](https://www.jianshu.com/p/81e9e9eaf8fa)
     + redux中间件
         [link](https://redux-saga-in-chinese.js.org/)
     + redux-saga
@@ -49,17 +50,48 @@
         > redux、react-redux、redux-saga 之类的概念，大家肯定觉得头昏脑涨的，什么 action、reducer、saga 之类的，写一个功能要在这些js文件里面不停的切换。
 
         >dva 做的事情很简单，就是让这些东西可以写到一起，不用分开来写了 产生了一个model的概念
-        > subscriptions TODO:
+        > subscriptions
             用于收集其他来源的 action，比如快捷键操作
     + redux源码解读 见../../reactLearn/reduxLearn
         **一个tip**
-        * 在combineReducer中,调用对应reducer后,hasChanged字段的判断条件是 
+        * 在combineReducer中,调用对应reducer后,hasChanged字段的判断条件是
             ```js
             // 这样，就会导致简单类型的值改变不会触发重新render
             hasChanged = hasChanged || newStateValue !== state[key] 
             return hasChanged ? newState : state;
             ```
+- redux实现流程
+    触发action,store去调用reducer,传入当前state与触发的action,reducer返回新的state，view变更
+- react-redux实现原理
+    + Provider 外部封装整个应用，向connect传递store
+    + connect 
+        1. 包装组件，将store和action通过props绑定
+        2. 监听store变化 触发组件更新
+- react-router实现原理
 
+- react-router 按需加载
+    1. getComponent
+        + [link](https://www.cnblogs.com/little-ab/p/6991721.html)
+        ```js
+        const helpCenter = (location, callback) => {
+            require.ensure([], require => {
+                callback(null, require('../Component/helpCenter').default)
+            }, 'helpCenter');
+        }
+        <Provider store={store}>
+            <Router history={history}>
+                <Route path="/" component={Roots}>
+                    <IndexRoute component={index} />//首页
+                    <Route path="index" component={index} />
+                    <Route path="helpCenter" getComponent={helpCenter} />//帮助中心
+                    <Route path="saleRecord" getComponent={saleRecord} />//销售记录
+                    <Redirect from='*' to='/'  />
+                </Route>
+            </Router>
+        </Provider>
+    ```
+    2. loadable
+- ref的应用场景
 - React生命周期有哪些，16版本生命周期发生了哪些变化？
     + 15:
         * 初始化
@@ -162,7 +194,13 @@
 - 原生事件和 React事件的区别？
 - React的合成事件是什么？
 - React和原生事件的执行顺序是什么？可以混用吗？
-- 虚拟Dom是什么？
+- 虚拟Dom是什么？实现原理是什么
+    + 【虚拟dom】在react中返回的html结构转换为{tag: 'xx', props: {className: 'xxx'}, children: []}的结构后，这个js对象就是所谓的虚拟dom
+    + 【实现原理】
+        1. 用js对象构建出一个dom树的结构，然后用这个dom树构建真实dom
+        2. 状态变更时，重新构建一个js对象dom树，与之前的dom树进行对比差异标记
+        3. 把差异应用到虚拟dom构建真实dom的过程中
+    + 减少了对真实dom的操作，因此可以说“对性能有提升”（相对的说法）
 - Dom diff算法 [link](https://www.infoq.cn/article/react-dom-diff/)
     + 在react中，由状态决定界面展示。在状态变更前后，对应两套状态，这两套状态对应两个dom树，dom diff算法即，对比这两个dom树的差异 
     + 标准diff算法需要O(n^3) facebook工程师将其降低至O(n) 
@@ -175,18 +213,55 @@
             2. 类型相同 属性不同
                 > 对属性对象进行重设
         2. 对于同一层次的一组子节点，可通过key唯一标识
+    + diff算法是怎么完成的
+        1. 把树形结构按照层级分解，只比较同级元素
+        2. 同级list节点按照key进行比较
+        3. react只匹配同种class类型的组件
+        4. 组件调用setState时，react将其标记为dirty；事件循环结束，对dirty组件进行重绘制
+        5. 选择性渲染--shouldComponentUpdate
 - 虚拟Dom比 普通Dom更快吗？
     这个说法是错误的，虚拟dom同样需要操作dom，甚至首次渲染时没有任何优势，而且更耗费性能和内存，但是后续dom的更新，由于虚拟dom可以进行diff和批处理，计算出需要更新的最小操作，这个步骤，我们可以在直接操作dom时手动进行，但是没有react做得好，而且会耗费更多的时间和性能，因此，才说虚拟dom帮助我们提高了开发效率
+- react fiber
+    由于js是单线程的，当dom diff的过程因为组件树的嵌套层级过深等原因导致阻塞时，会影响用户的交互 因为渲染过程无法打断
+    react fiber在16后将render前后的时间点分开，前边可以打断，后边不能打断，因此，前边的生命周期就可能会多次执行，这也是16要将will生命周期去掉的原因，要避免前边生命周期可能带来的副作用（比如在will里发起ajax请求  就重复多次， 不符合预期）
+- PureComponent
+    + 在shouldComponentUpdate周期内，通过浅比较props、state来判断是否需要重新render;
+    + 当明确知道存储结构是比较简单的结构或者直接使用不可变对象时，建议使用
+    + 子组件也要使用PureComponent
 - 虚拟Dom中的 $$typeof属性的作用是什么？
+    [link](https://www.jianshu.com/p/f93b8a400002)
+    $$typeof：一个我们不常见到的属性，它被赋值为 REACT_ELEMENT_TYPE
+    var REACT_ELEMENT_TYPE =  (typeof Symbol === 'function' && Symbol.for && Symbol.for('react.element')) ||  0xeac7;
+    可见， $$typeof是一个 Symbol类型的变量，这个变量可以防止 XSS
+- 怎么从虚拟dom拿到真实dom
+    + 利用ref属性拿到真实dom的句柄
+    1. <div ref={(ref)=>this.ref=ref}> this.ref
+    2. <div ref="myRef"> this.refs.myRef
+- react数据传递
+    + 父子组件，父->子 props 子->父 通过父组件传进来的函数调用并传参
+    + 兄弟组件 向上找同一个父组件或者redux统一管理状态信息
+- react优势
+    1. 单向数据流
+    2. 虚拟dom
+    3. 单向数据流
+    4. 跨浏览器兼容
+- react开发中的性能优化
+    + shouldComponentUpdate
+    + class函数尽量提前bind
+    + 减少操作真实dom
 - React组件的渲染流程是什么？
 - 为什么代码中一定要引入 React？
+    React.createElement
 - 为什么 React组件首字母必须大写？
 - React在渲染 真实Dom时做了哪些性能优化？
 - 什么是高阶组件？如何实现？
 - HOC在业务场景中有哪些实际应用场景？
 - 高阶组件( HOC)和 Mixin的异同点是什么？
 - Hook有哪些优势
-
+    [mixin->hoc->hook](https://juejin.im/post/5cad39b3f265da03502b1c0a)
+- react hooks
+    函数形式表达class state状态是const属性 useEffect是周期函数
+    [link](https://tomoya92.github.io/2019/07/23/react-hooks/)
 
 ##### 李煜知乎文章系列
 - React解决了哪些问题
@@ -214,6 +289,7 @@
             }
             ```
     + HOC 高阶组件
+        状态管理 新生命周期 渲染劫持 复用重复的逻辑（如日志） connect就是hoc
         ```js
         class BaseComponent extends React.Component {
             render() {
@@ -277,11 +353,15 @@
     [官方文档](https://reactjs.org/docs/reconciliation.html)
     1. 不同类型的两个节点产生不同的树
     2. 开发人员使用key提示哪些节点是稳定的
-- Vue双向数据绑定 [link](https://zhuanlan.zhihu.com/p/27829029)
-- 
+<!-- - Vue双向数据绑定 [link](https://zhuanlan.zhihu.com/p/27829029) -->
 - React服务端渲染
     TODO: 服务端渲染react的生命周期有哪些不同
     [link](https://www.cnblogs.com/BestMePeng/p/react_ssr.html)
+
+
+
+[https://segmentfault.com/a/1190000017140200]
+[https://segmentfault.com/a/1190000018604138]
 
 
 

@@ -3,12 +3,6 @@ function hw(str) {
     let strReverse = str.split('').reverser().join('');
     return strReverse === str;
 }
-// 数组去重
-function arrQC(arr) {
-    // filter+arr2
-    // set+from
-    // forEach
-}
 // 字符串中出现最多的字符
 function getNum(str) {
     let obj = {};
@@ -67,9 +61,9 @@ function quickSort(arr, left, right) {
     }
     quickSort(arr, left, j - 1);
     quickSort(arr, j + 1, right);
+    return arr;
 }
-// quickSort(arr);
-// console.log(arr);
+// console.log(quickSort(arr));
 
 // 插入排序
 let arr = [3, 10, 1, 56, 48, 9, 27];
@@ -79,7 +73,6 @@ function insertSort(arr) {
     // arr[0]这部分当做初始有序部分
     for(i = 1; i < arr.length; i ++) {
         let temp = arr[i];  // 待插入元素
-        j = i - 1;
         // 两个条件同时判断 如果不大于temp 退出当次循环即可
         for(j = i - 1; j >= 0 && arr[j] > temp; j --) {
             arr[j+1] = arr[j];
@@ -291,3 +284,186 @@ function makeNewArr(arr) {
         let index = parseInt(Math.random() * arr.length);
         [arr[index], arr[i]] = [arr[i], arr[index]];
     }
+
+// 数组扁平化
+let arr = [1,2,3,[4,5],[6,[7,8]],9]
+// 01-queue
+function getAll(arr) {
+    let queue = [];
+    let res = [];
+    arr.forEach(element => {
+        queue.push(element);
+        while (queue.length) {
+            let cur = queue.shift();
+            if(Array.isArray(cur)) {
+                queue.push(...cur);
+            } else {
+                res.push(cur);
+            }
+        }
+    });
+    return res;
+}
+console.log(getAll(arr));
+
+// 优化-> 去掉一次循环 不需要新搞一个结构 直接把arr当成queue
+let arr = [1,2,3,[4,5],[6,[7,8]],9]
+// 01-queue
+function getAll(arr) {
+    let res = [];
+    while (arr.length) {
+        let cur = arr.shift();
+        if(Array.isArray(cur)) {
+            arr.unshift(...cur);
+        } else {
+            res.push(cur);
+        }
+    }
+    return res;
+}
+console.log(getAll(arr));
+
+// 02-递归
+function getAll(arr){
+	let retArr = [];
+	for(let i = 0; i < arr.length; i++){
+		if(Array.isArray(arr[i])) {
+			retArr = retArr.concat(getAll(arr[i]));
+		} else {
+			retArr.push(arr[i]);
+		}
+	}
+	return retArr;
+}
+// getAll(arr)
+// 02-reduce
+function getAll(arr) {
+    return arr.reduce((prev, curr) => {
+        if(Array.isArray(curr)) {
+            curr = getAll(curr);
+        }
+        prev = prev.concat(curr);
+    }, []);
+}
+
+// 03-Array.prototype.flat
+arr.flat(Math.pow(2, 53) - 1);
+
+
+
+// 数组去重
+// 01-map
+function foo2(arr) {
+    let res = [];
+    let map = new Map();
+    arr.forEach(item => {
+        if(!map.has(item)) {
+            map.set(item, true);
+            res.push(item);
+        }
+    });
+    return res;
+}
+console.log(foo2(arr));
+// 02-set+from
+// console.log(Array.from(new Set(arr)));
+
+// 03-reduce
+function foo(arr) {
+    return arr.reduce((prev, curr) => {
+        return prev.includes(curr) ? prev : [...prev, curr]
+    }, []);
+}
+// console.log(foo(arr))
+
+// 04- indexOf / includes + for循环
+
+
+
+// 一个图片url的数组，要求同时下载数不超过3个
+function downLoadImg(imgs) {
+    let loadQueue = [];
+    while (imgs.length && loadQueue.length < 3) {
+        let curImg = imgs.shift();
+        new Image(curImg).onload(() => {
+            loadQueue.shift();
+        })
+    }
+}
+
+
+// 寻找二叉树值为target的线路（如果要找到所有怎么办）
+// 如果只找到最后的节点可以像这样写，深度优先找到第一个
+function Tree(value, left, right) {
+    this.value = value;
+    this.left = left;
+    this.right = right;
+}
+let t4 = new Tree(4);
+let t5 = new Tree(8);
+let t6 = new Tree(3);
+let t7 = new Tree(5);
+let t2 = new Tree(2, t4, t5);
+let t3 = new Tree(7, t6, t7);
+
+let t1 = new Tree(1, t2, t3);
+
+function findTarget(treeNode, target) {
+    if(!treeNode) return null;
+    treeNode.sum = treeNode.value;
+    let stack = [];
+    stack.push(treeNode);
+    while (stack.length) {
+        let cur = stack.pop();
+        let {left, right} = cur;
+        if(cur.sum == target) {
+            return cur;
+        }
+
+        right && stack.push({...right, sum: cur.sum + right.value});
+        left && stack.push({...left, sum: cur.sum + left.value});
+    }
+    return null;
+}
+console.log(findTarget(t1, 11));
+// 如果要记录路径，用中序遍历，存储stack
+function findTarget2(treeNode, target) {
+    if(!treeNode) return null;
+    let stack = [];
+    let cur = treeNode;
+    stack.push(cur);
+    while(target!=0 && stack.length) {
+        cur = stack[stack.length - 1]; // 栈顶元素
+
+        if(cur && !cur.flag) {
+            cur.flag = true;
+        }
+
+        if(cur.left && !cur.left.flag || !cur.left) {
+            target -= cur.value;
+        }
+        if(target == 0) {
+            return stack;
+        }
+        // 直接出栈就行
+        if(!cur.left || !cur.right || (cur.left.flag && cur.right.flag)) {
+            stack.pop();
+            target += cur.value;
+        }
+        if(cur.left && !cur.left.flag) {
+            stack.push(cur.left);
+        } else if(cur.right && !cur.right.flag){
+            stack.push(cur.right);
+        }
+    }
+    return null;
+}
+
+// 找到所有的
+
+
+
+// 遍历二叉树所有层 每次为一个数组 返回二维数组
+function getTree(treeNode) {
+
+}
