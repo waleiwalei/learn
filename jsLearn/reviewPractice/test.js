@@ -1,343 +1,285 @@
-// // 原型式继承 
-// function Sup() {}
-// let sup = new Sup();
-// function Sub() {}
-// Sub.prototype = sup;
-// Sub.prototype.constructor = Sub
-
-// // 构造函数继承
-// function Sup(x){this.x = x}
-// function Sub(x, y){
-//     Sup.call(this, x)
-//     this.y = y
-// }
-// // 组合
-// function Sup(x){this.x = x}
-// function Sub(x, y){
-//     Sup.call(this, x)
-//     this.y = y
-// }
-// let sup = new Sup()
-
-
-// // 原型式继承
-// function objCreate(obj) {
-//     function F(){}
-//     F.prototype = obj;
-//     F.prototype.constructor = F;
-//     return new F();
-// }
-
-// // 寄生继承
-// function createObj(obj) {
-//     var newObj = Object.create(obj);
-//     newObj.xxx = () => {}
-//     return newObj;
-// }
-
-// // 寄生组合
-// function changeProto(sup, sub) {
-//     var obj = Object.create(sup.prototype);
-//     obj.constructor = sub;
-//     sub.prototype = obj;
-// }
-
-
-
-
-// // bind
-// Function.prototype.bind = function (context, ...args) {
-//     let _this = this;
-//     return function (...arguments) {
-//         _this.call(context, ...args, ...arguments);
-//     }
-// }
-
-// // apply
-// // Function.prototype.call = function (context, args) {
-// // call
-// Function.prototype.call = function (context, ...args) {
-//     if(!context) {
-//         context = typeof window === 'undefined' ? global : window;
-//     }
-//     let _this = this;
-//     let res = {};
-//     context.fn = _this;
-//     res = context.fn(...args);
-//     res = context.fn()
-//     delete context.fn;
-//     return res;
-// }
-
-// add(1)(2)(3)
-
-// function add(...args) {
-//     let allArgs = args;
-//     function currying(...argus) {
-//         allArgs = allArgs.concat(argus);
-//         return currying;
-//     }
-//     currying.toString = function () {
-//         return allArgs.reduce((prev, curr) => {
-//             return prev + curr;
-//         }, 0);
-//     }
-//     return currying;
-// }
-// console.log(add(1)(2)(3))
-
-// function add(a, b, c) {
-//     return a + b + c;
-// }
-
-// function currying(fn, ...args) {
-//     return fn.length > args.length ?
-//         (...argus) => currying(fn, ...args, ...argus) :
-//         fn(...args, ...argus)
-// }
-// let foo = currying(add, 1);
-// console.log(foo(2)(3));
-
-
-// // throttle
-// function _throttle(fn, wait, options) {
-//     let {leading, trailing} = options || {};
-//     let prev = 0, remain, timer = null, now, res, context, args;
-
-//     function later() {
-//         prev = !leading ? 0 : Date.now();
-//         timer = null;
-//         res = fn.apply(context, args);
-//         context = args = null;
-//     }
-
-//     return function() {
-//         context = this, args = arguments;
-
-//         now = Date.now();
-//         // 执行过 忽略这次的执行
-//         if(!prev && !leading) {
-//             prev = now;
-//         }
-
-//         remain = wait - (now - prev);
-//         if(remain <= 0 || remain > wait) {
-//             if(timer) {
-//                 clearTimeout(timer);
-//                 timer = null;
-//             }
-
-//             prev = Date.now();
-//             res = fn.apply(context, args);
-//             context = args = null;
-//         } else if(!timer && trailing) {
-//             timer = setTimeout(later, remain);
-//         }
-
-//         return res;
-//     }
-
-// }
-
-
-
-// // Promise.all
-// Promise.all = function(promises) {
-//     return new Promise((resolve, reject) => {
-//         if(!promises.length) resolve([]);
-//         let res = [];
-//         for(let i = 0; i < promises.length; i ++) {
-//             Promise.resolve(promises[i]).then(data => {
-//                 res.push(data);
-
-//                 if(res.length == promises.length) {
-//                     resolve(res);
-//                     return;
-//                 }
-//             }, err => {
-//                 reject(err);
-//                 return;
-//             });
-//         }
-//     })
-// }
-
-// // Promise.race
-// Promise.race = function(promises) {
-//     if(typeof promises[Symbol.iterator] !== 'function') {
-//         return Promise.reject("args is not iteratable!");
-//     }
-//     return new Promise((resolve, reject) => {
-//         if(!promises.length) return;
-//         for(let i = 0; i < promises.length; i ++) {
-//             Promise.resolve(promises[i]).then(data => {
-//                 resolve(data);
-//                 return;
-//             }, err=>{
-//                 reject(err);
-//                 return;
-//             })
-//         }
-//     })
-// }
-// // Promise.finally
-// Promise.prototype.finally = function (callback) {
-//     return this.then(
-//       value  => Promise.resolve(callback()).then(() => value),
-//       reason => Promise.resolve(callback()).then(() => { throw reason })
-//     );
-// }
-
-// // Promise简单实现
-// var p = new Promise((resolve, reject) => {
-//     if(1) {
-//         resolve();
-//     } else {
-//         reject();
-//     }
-// }).finally(() => {
-
-// })
-
-// function Promise(callback) {
-//     this.status = 'pending';
-//     this.data = {};
-
-//     callback((data)=>{
-//         this.status = 'fulfilled';
-//         this.data = data;
-//     },(err)=>{
-//         this.status = 'rejected';
-//         this.data = err;
-//     })
-// }
-
-// Promise.then = function(resolve, reject) {
-//     if(this.status == 'fulfilled') {
-//         resolve(this.data);
-//     }
-//     if(this.status == 'rejected') {
-//         reject(this.data);
-//     }
-// }
-
-// // map实现
-// Array.map = function(callback, context) {
-//     let res = [];
-//     let arr = this;
-//     for(let i = i; i < arr.length; i ++) {
-//         res.push(callback.call(context, arr[i], i, arr));
-//     }
-//     return res;
-// }
-
-// function _instanceOf(obj, func) {
-//     let proto = func.prototype;
-//     let __proto__ = obj.__proto__;
-//     while(1) {
-//         if(proto === __proto__) return true;
-//         if(!__proto__) return false;
-//         __proto__ = obj.__proto__;
-//     }
-// }
-
-// 冒泡
-// function sort(arr) {
-//     for(let i = 0; i < arr.length; i ++) {
-//         for(j = i; j < arr.length; j ++) {
-//             if(arr[j] < arr[i]) {
-//                 [arr[j], arr[i]] = [arr[i], arr[j]]
-//             }
-//         }
-//     }
-//     return arr;
-// }
-// let arr = [12,4,2,5,8];
-// console.log(sort(arr));
-
-// 快速排序
-function quickSort(arr, left, right) {
-    left = left || 0;
-    right = right || arr.length - 1;
-    let i = left, j = right;
-    if(left>=right)return;
-    while (i < j) {
-        let cur = arr[i];
-        while (i < j && arr[j] >= cur) {
-            j--;
-        }
-        while (i < j && arr[i] <= cur) {
-            i++;
-        }
-
-        if(i == j) {
-            [arr[j], arr[left]] = [arr[left], arr[j]]
-        }
-        if(i < j) {
-            [arr[j], arr[i]] = [arr[i], arr[j]]
-        }
+Function.prototype.bind = function (context, ...args) {
+    let fn = this;
+    return function() {
+        fn.call(context, ...args, ...arguments);
     }
-    quickSort(arr, left, j - 1);
-    quickSort(arr, j+1, right);
-    return arr;
 }
 
-// 插入排序
-function insert(arr) {
-    for(let i = 1; i < arr.length; i ++) {
-        let cur = arr[i];
-        for(let j = i; j >= 0 && arr[j] > cur; j --) {
-            arr[j+1] = arr[j];
-        }
-        arr[j] = cur;
+Function.prototype.call = function (context = window, ...args) {
+    let fn = this;
+    context.fn = fn;
+    let res;
+    res = context.fn(...args);
+    delete context.fn;
+    return res;
+}
+
+function _throttle(fn, wait, options) {
+    let context, args, prev = 0, res, remain;
+    let {leading, trailing} = options || {};
+
+    function later() {
+        prev = leading === false ? 0 : Date.now();
+        timer = null;
+        res = fn.apply(context, args);
+        context = args = null;
     }
-    return arr;
+
+    function throttle() {
+        context = this;
+        args = Array.prototype.slice.call(arguments);
+        let now = Date.now();
+        if(!prev && leading === false) {
+            prev = now;
+        }
+        remain = wait - (now - prev);
+        if(remain <= 0 || remain > wait) {
+            if(timer) {
+                clearTimeout(timer);
+                timer = null;
+            }
+
+            prev = Date.now();
+            res = fn.apply(context, args);
+            context = args = null;
+        } else if(!timer && trailing !== false) {
+            timer = setTimeout(later, remain);
+        }
+
+        return res;
+    }
+
+    throttle.cancel = function() {
+        clearTimeout(timer);
+        timer = null;
+    }
+
+    return throttle;
+}
+
+function debounce(fn, wait, immediate) {
+    let timer = null, context, args, res;
+
+    function later() {
+        setTimeout(() => {
+            timer = null;
+            if(!immediate) {
+                res = fn.apply(context, args);
+                context = args = null;
+            }
+        }, wait);
+    }
+
+    return function() {
+        context = this;
+        args = arguments;
+
+        if(!timer) {
+            timer = later();
+            if(immediate) {
+                res = fn.apply(context, args);
+            }
+        } else {
+            clearTimeout(timer);
+            timer = later();
+        }
+        return res;
+    }
+}
+
+function _debounce(fn, wait, immediate) {
+    let timer, context, args, res;
+
+    function later() {
+        setTimeout(() => {
+            timer = null;
+            res = fn.apply(context, args);
+            context = args = null;
+        }, wait);
+    }
+
+    return function () {
+        if(!timer) {
+            timer = later();
+            if(immediate) {
+                res = fn.apply(context, args);
+            }
+        } else {
+            clearTimeout(timer);
+            timer = later();
+        }
+
+        return res;
+    }
+}
+
+
+// 深拷贝
+function deepClone(obj, map = new WeakMap()) {
+    if(obj instanceof RegExp) return new RegExp(obj);
+    if(obj instanceof Date) return new Date(obj);
+    if(obj === null || typeof obj !== 'object') return obj;
+
+    if(map.has(obj)) {
+        return map.get(obj);
+    }
+
+    res = {};
+    map.set(obj, res);
+    for(let k in obj) {
+        if(obj.hasOwnProperty(k)) {
+            res[k] = deepClone(obj[k], map);
+        }
+    }
+
+    return res;
 }
 
 // 数组去重
 function unique(arr) {
-    // return Array.from(new Set(arr));
-    // return [...(new Set(arr))];
-    arr.reduce((prev, curr)=>{
-        return prev.includes(curr) ? prev : [...prev, curr]
+    let obj = {}
+    return arr.filter((item) => {
+        let flag = obj[item];
+        obj[item] = 1;
+        return flag;
+    })
+}
+
+// set
+
+// 扁平化
+arr.flat(Math.pow(2, 50));
+function easy(arr) {
+    let res = [];
+    while(arr.length) {
+        let cur = arr.shift();
+        if(Array.isArray(cur)) {
+            arr.unshift(...cur);
+        } else {
+            res.push(cur);
+        }
+    }
+}
+function easy(arr) {
+    let res = [];
+    arr.forEach((item) => {
+        if(Array.isArray(item)) {
+            res = res.concat(easy(item));
+        } else {
+            res.push(item);
+        }
+    })
+
+    return res;
+}
+
+
+Array.prototype.reduceToFilter = function(handler) {
+    let _arr = this;
+    return _arr.reduce((prev, curr, index) => {
+        if(handler(curr, index)) {
+            prev.push(curr);
+        }
+        return prev;
     }, []);
 }
 
-// 数组扁平化
-function changeArr(arr) {
-    let arr = [];
-    // return arr.flat(Math.pow(2, 53) - 1)
-    for(let i = 0; i < arr.length; i ++) {
-        if(Object.prototype.toString.call(arr[i]) == '[object Array]') {
-            arr = arr.concat(changeArr(arr[i]));
-        } else {
-            arr.push(arr[i])
-        }
-    }
+// 数组乱序
+function changeRandom(arr) {
+    arr.forEach((item, i) => {
+        let randomNum = Math.floor(Math.random() * arr.length);
+        [arr[i], arr[randomNum]] = [arr[randomNum], arr[i]];
+    })
     return arr;
 }
 
-// 快速排序
+// 柯里化
+function currying(fn, ...args) {
+    return fn.length > args.length ?
+        () => currying(fn, ...args, ...arguments) :
+        fn(...args)
+}
+
+// jsonp
+function jsonp(url, params, cb, cbName) {
+    let script = document.createElement('script');
+    let paramsStr = '';
+    for(let k in params) {
+        if(params.hasOwnProperty(k)) {
+            paramsStr += `${k}=${params[k]}&`
+        }
+    }
+    paramsStr += `${url}?${paramsStr}&callback=${cbName}`;
+    script.src = paramsStr;
+    window[cbName] = (data) => {
+        cb && cb(data);
+        window[cbName] = undefined;
+        document.body.removeChild(script);
+    }
+    document.body.appendChild(script);
+}
+
+var p = new Promise((resolve, reject)=> {
+    if(true) {
+        resolve();
+    } else {
+        reject();
+    }
+})
+
+// promise
+function Promise(callback) {
+    this.status = 'pending';
+    this.data = '';
+
+    function resolve(data) {
+        this.status = 'fulfilled';
+        this.data = data;
+    }
+
+    function reject(err) {
+        this.status = 'rejected';
+        this.data = err;
+    }
+
+    try {
+        callback(resolve, reject);
+    } catch (error) {
+        reject(error);
+    }
+}
+Promise.prototype.then = function (resolve, reject) {
+    if(this.status == 'fulfilled') {
+        resolve(this.data);
+    } else {
+        reject(this.data);
+    }
+}
+
+const Logger = store => next => action => {
+    const res = next(action);
+    console.log('current state', store.getState());
+    console.log('action info', action);
+    return res;
+}
+
+
 function quickSort(arr, left, right) {
     left = left || 0;
     right = right || arr.length - 1;
     let i = left, j = right;
-
-    let cur = arr[left];
-    if(left >= right) return;
-    while(i < j) {
-        if(arr[j] <= cur && i < j) {
+    while (i < j) {
+        while (i < j && arr[j] > arr[left]) {
             j --;
         }
-        if(arr[i] >= cur && i < i) {
+        while (i < j && arr[i] < arr[left]) {
             i ++;
         }
 
         if(i == j) {
-            left /j
-        }
-        if(i < j) {
-            i/j
+            [arr[j], arr[left]] = [arr[left], arr[j]];
+        } else {
+            [arr[i], arr[j]] = [arr[j], arr[i]];
         }
     }
     quickSort(arr, left, j - 1);
@@ -345,56 +287,103 @@ function quickSort(arr, left, right) {
     return arr;
 }
 
-// DFS BFS
-function DFS(treeNode) {
-    if(!treeNode) return;
-    let stack = [];
-    stack.push(treeNode);
-    while(stack.length) {
-        let cur = stack.pop();
-        let {left, right} = cur;
-        console.log(cur.val);
-        right && stack.push(right);
-        left && stack.push(left);
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const Logger = store => next => action => {
+    console.log('action', action);
+    const res = next(action);
+    console.log('currentState', store.getState());
+    return res;
 }
-function BFS(treeNode) {
-    if(!treeNode) return;
+
+
+//line=readline()
+//print(line)
+function getHeight(root) {
     let queue = [];
-    queue.push(treeNode);
-    while (queue.length) {
-        let cur = queue.shift();
-        let {left, right} = cur;
-        console.log(cur.val);
-        left && queue.push(left);
-        right && queue.push(right);
+    if(!root) return 0;
+    let height = 0;
+    queue.push(root);
+    while(queue.length) {
+        let size = queue.length;
+        while(size--) {
+            let curr = queue.shift();
+            let {left, right} = curr;
+            left && queue.push(left);
+            right && queue.push(right);
+        }
+        height ++;
     }
+    return height;
+}
+
+function f(root) {
+    return (Math.abs(getHeight(root.left) - getHeight(root.right)) <= 1) && f(root.left) && f(root.right);
+}
+f(root);
+
+
+
+
+
+//line=readline()
+//print(line)
+
+Promise.prototype.all = function(promises, num) {
+    let curLength = 0, res = [];
+
+    function addPromise(res, rej) {
+        return new Promise((resolve) => {
+            let promise = promises.shift();
+            curLength ++;
+            Promise.resolve(promise).then((data)=>{
+                res.push(data);
+                curLength --;
+                res();
+                if(res.length == promises.length) {
+                    resolve(res);
+                    return;
+                }
+            }, (err) => {
+                reject(err);
+                return;
+            })
+        })
+    }
+    
+    return new Promise((resolve, reject) => {
+        for(let i = 0; i < num; i ++) {
+            addPromise(resolve, reject)
+        }
+    })
 }
 
 
-// debounce
-function debounce(func, wait, immediate) {
-
-    var timeout, result;
-
-    return function () {
-        var context = this;
-        var args = arguments;
-
-        if (timeout) clearTimeout(timeout);
-        if (immediate) {
-            // 如果已经执行过，不再执行
-            var callNow = !timeout;
-            timeout = setTimeout(function(){
-                timeout = null;
-            }, wait)
-            if (callNow) result = func.apply(context, args)
+Promise.prototype.race = function(promises) {
+    return new Promise((resolve, reject) => {
+        for(let i = 0 ; i < promises.length; i ++) {
+            Promise.resolve(promises[i]).then((data)=>{
+                resolve(data);
+                return;
+            }, (err)=>{
+                reject(err);
+                return;
+            })
         }
-        else {
-            timeout = setTimeout(function(){
-                func.apply(context, args)
-            }, wait);
-        }
-        return result;
-    }
+    })
 }
+

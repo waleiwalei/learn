@@ -34,12 +34,20 @@ function applyMiddleware(...middlewares) {
         }
     }
 }
+
+const logger = store => next => action => {
+    console.log('dispatching', action)
+    let result = next(action)
+    console.log('next state', store.getState())
+    // 这个action=>{}函数会作为参数传递给下一个middleware的next参数:next=>action=>{}
+    return result
+}
 ```
 
 #### 代码解读
 - index.js
 - createStore(reducer,preLoadedState,enhancer)
-    * reducer 一个返回新的state的函数
+    * reducer 一个返回新的state的函数 combineReducer的返回函数，一个闭包
     * preLoadedState 初始state、当前state
     * enhancer store增强器,一般用作加入中间件,在redux中惟一的使用中间件方式就是applyMiddleware()
     ```js

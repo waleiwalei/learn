@@ -45,5 +45,5 @@ function createObj(obj) {
 function changeProto(sup, sub) {
     let newObj = Object.create(sup.prototype);
     sub.prototype = newObj;
-    sub.prototype.constructor = sub;
+    newObj.constructor = sub;
 }

@@ -273,10 +273,29 @@
 
 - 跨域
     1. cors(简单请求get/post/head 非简单请求-options预检)
+        + 服务端认可请求源，就会在响应头加入：
+            * Access-Control-Allow-Origin 允许的源
+            * Access-Control-Allow-Credentials  是否可以携带cookie 【配合浏览器请求的withCredentials】
+            * Access-Control-Expose-Header 携带的额外的字段【Cache-control/content-type/content-language/expires/last-modified】
+            * Access-Control-Max-Age 【非简单请求会多加这个】
+        + 非简单请求
+            * Access-Control-Request-Methods
+            * Access-Control-Request-Headers 额外头信息
     2. nginx反向代理
     3. node代理转发
-    4. window.name+iframe [postMessage]
-    5. jsonp （**只支持get方法**）[<script src="http://jsonp.js?callback=xxx"></script>]
+    4. iframe【记得要在iframe onload后操作】
+    + 基本原理：a.html[a.www.com]想要访问b.www.com的资源,可以在a.html中嵌入一个b.html[域名问b.www.com],通过b.html访问同域名的资源后，a可以拿到返回数据[
+        1. 要么通过回调执行方法并传数据参，这种需要将b重定向到一个a域名下的页面，通过window.top.cb方法执行；
+        (参考)[https://blog.csdn.net/dreamjay1997/article/details/81319304]
+        2. 要么通过a的dom节点存储数据，这种可以使用a页面直接定义b页面需要执行的js代码，这样就可以直接取到.wrap节点【a/b都要设置document.domain，所以适用于同一个主域场景】【子窗口对象：$('#bframe')[0].contentWindow】
+        (参考)[https://www.h5course.com/a/20160413409.html]
+    ]
+    ```js
+    window.top.cb(data);
+    $('.wrap').html(data);
+    ```
+    5. postmessage
+    6. jsonp （**只支持get方法**）[<script src="http://jsonp.js?callback=xxx"></script>]
         ```js
             // 简单jsonp-1
             function jsonp(req){
@@ -410,20 +429,24 @@
     + XSS[Cross Site Scripting跨站脚本攻击] 
         * 恶意攻击者将可执行js代码提交到服务器 然后在其他用户端执行
         现代MVVM框架，ng2、vue、handlebars中都自带防XSS攻击模板写法(eg: handlebars中的{{}}表示自动过滤,{{{}}}才会不经转义直接输出)
-        * 需要注意，不仅是script标签可以加入可执行代码，任何dom节点都可以增加onClick/onload事件
+        * 需要注意，不仅是script标签可以加入可执行代码，任何dom节点都可以增加onClick/onload事件 <img src='123' onerror="alert(1)">
+        * 通过注入js脚本发起请求，获取登录用户的cookie信息并在自己的后台收集，最后在自己的浏览器中加入cookie信息，就可以伪造用户发起请求
+        * 或者在修改密码的请求抓包中注意到没有校验原始密码，可以注入修改密码的script标签请求（csrf攻击）
         * 网站建设方的防护手段
             1. 转义 &lt; &gt; 这些特殊字符为实体字符
             2. 输入检查，利用正则判断攻击脚本
             3. 尽量修改节点文本而不是修改节点内容html
             4. httponly 使得通过脚本无法读取cookie信息
+            5. 对输入内容长度做限制
 
     + CSRF[Cross-site request forgery跨站请求伪造]
+        (详细讲解)[https://zhuanlan.zhihu.com/p/46592479]
         > 劫持用户向服务器发送非预期请求
         * 恶意用户将某些需要他人权限的接口埋藏在自己的代码中，通过比如XSS攻击方式，或诱导用户点击等令拥有权限者执行从而达到自己的目的
         * 网站建设方的防护手段
             1. 验证码
-            2. token
-            3. referer检测
+            2. token【在用户请求页面资源时将token作为表单节点传回去，并同时设置cookie字段，下次服务器收到请求会校验，问题是：增加一些冗余dom节点，表单内容通过get也可以截获；而且如何】
+            3. refer、origin检测
     + 补充：
         * SSRF(Server-Side Request Forgery:服务器端请求伪造) 
             > 是一种由攻击者构造形成由服务端发起请求的一个安全漏洞。一般情况下，SSRF攻击的目标是从外网无法访问的内部系统。（正是因为它是由服务端发起的，所以它能够请求到与它相连而与外网隔离的内部系统）
@@ -432,6 +455,9 @@
 
             > 修复方式: 1.设置URL白名单或者限制内网IP
                 2.统一错误信息，避免用户可以根据错误信息来判断远端服务器的端口状态。
+    + token/session
+        - session，注册登录->服务端将user存入session->将sessionid存入浏览器的cookie->再次访问时根据cookie里的sessionid找到session里的user
+        - token，注册登录->服务端将生成一个token，并将token与user加密生成一个密文->将token+user+密文数据 返回给浏览器->再次访问时传递token+user+密文数据，后台会再次使用token+user生成新密文，与传递过来的密文比较，一致则正确
 
 - 从输入URL到显示页面发生了什么[TODO:浏览器渲染流程]
     1. url解析

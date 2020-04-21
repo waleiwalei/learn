@@ -243,8 +243,7 @@
 - react优势
     1. 单向数据流
     2. 虚拟dom
-    3. 单向数据流
-    4. 跨浏览器兼容
+    3. 跨浏览器兼容
 - react开发中的性能优化
     + shouldComponentUpdate
     + class函数尽量提前bind
