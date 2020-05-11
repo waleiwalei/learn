@@ -37,13 +37,79 @@
 - 简单来说就是给js提供调用native功能的接口
 - 核心是给native和非native构建双向通信的通道
 
-- [yl-设计]
     + JSBridge通信原理，有哪几种实现的方式？
 
         * JsBridge给Javascript提供了调用Native功能，Native也能够操控JavaScript。这样前端部分就可以方便使用地理位置、摄像头以及登录支付等Native能力了。JsBridge构建Native和非Native间消息通信的通道，而且是双向通信的通道。
 
         * JS向Native发送消息：调用相关功能，通知Native当前JS的相关状态等。 Native向JS发送消息：回溯调用结果、消息推送、通知JS当前Native的状态等
+- JS调用Native两种方式
+    1. API注入 将native功能通过webview接口注入到window对象
+    2. 拦截url scheme 通过iframe.src [scheme: 自定义protocol+host]
+- 一个jsBridge的简单实现
+```js
+(function() {
+    var id = 0, callbacks = [], registerFunc = [];
 
+    window.JSBridge = {
+        // 调用native功能
+        invoke: function(bridgeName, data, callback) {
+            var thisId = id++;
+            callbacks[thisId] = callback;
+            nativeBridge.postMessage({
+                bridgeName,
+                data,
+                callbackId: thisId
+            })
+        },
+        receiveMsg: function(msg) {
+            var {bridgeName, data, callbackId, responseId} = msg;
+            // callbackId和bridgeName不同时存在
+            if(callbackId) {
+                callbacks[callbackId](data);
+            } else if(bridgeName) {
+                if(registerFunc[bridgeName]) {
+                    var ret = {};
+                    registerFunc[bridgeName].forEach(function (callback) {
+                        callback(data, function(r) {
+                            flag = true;
+                            ret = Object.assign(ret, r);
+                        })
+                    });
+                    nativeBridge.postMessage({
+                        responseId: responseId,
+                        ret
+                    })
+                }
+            }
+
+        },
+        register: function(bridgeName, callback) {
+            if(!registerFunc[bridgeName]) {
+                registerFunc[bridgeName] = []
+            } else {
+                registerFunc[bridgeName].push(callback);
+            }
+        }
+    }
+})()
+```
+
+
+
+### JSBridge常见功能
+#### 通用功能
+- 自定义titleBar/左右按钮
+- 打开webview承接新的url
+- 关闭当前webview
+- 关闭前面webview
+- 下拉刷新
+- app唤起
+#### 业务功能
+- 页面分享
+- 支付
+- 调用相机。图片上传
+- 定位
+#### 
 [JSBridge原理](https://juejin.im/post/5abca877f265da238155b6bc)
 ### 参考
 [link](https://www.cnblogs.com/dailc/p/5930231.html)

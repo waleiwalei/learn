@@ -309,23 +309,23 @@ console.log((a.i==1)&&(a.i==2)&&(a.i==3));
             2. 无回调时失败状态外部无感知
             3. 无法得知pending中具体进度
     ```js
-    Promise.all = function (promises) {
+    Promise.all = function(promises) {
+        let res = [], curLen = 0;
         return new Promise((resolve, reject) => {
-            let result = [];
-            if(!promises.length) {
-                resolve([]);
-            }
             for(let i = 0; i < promises.length; i ++) {
-                Promise.resolve(promises[i]).then((data) => {
-                    result.push(data);
-                    if(i+1==promises.length) {
-                        resolve(result);
+                Promise.resolve(promises[i]).then(data => {
+                    res[i] = data;
+                    curLen ++;
+                    if(curLen == promises.length) {
+                        resolve(res);
+                        return;
                     }
-                }).catch((err)=>{
+                }, err => {
                     reject(err);
                     return;
-                })
+                }) 
             }
+            
         })
     }
     Promise.race = function (promises) {

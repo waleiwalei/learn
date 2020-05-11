@@ -44,7 +44,8 @@
     + 创建子进程 child_process
         * spawn() 启动子进程执行命令
         * exec() 启动子进程执行命令，并且有一个回调可以获取子进程状态
-        * execFile() 启动子进程执行可执行文件 如果是js文件 头部必须有#!usr/bin/env node
+        * execFile() 启动子进程执行可执行文件 如果是js文件 头部必须有
+        #!usr/bin/env node
         * fork() 启动子进程执行js文件
     + 对比
 
