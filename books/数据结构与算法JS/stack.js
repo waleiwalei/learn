@@ -115,11 +115,78 @@ function judge(str) {
     return -1;
 }
 
-console.log(judge('1+2*(3-6)'));
+// console.log(judge('1+2*(3-6)'));
 
 
 // 2. 中缀表达式转后缀【两个栈 一个存数字一个存操作符】 并利用栈求值
+// function infixToPostfix(exp) {
+//     var operatorStack = new Stack();
+//     var postfixExp = [];
 
+//     exp.split('').forEach(function (char) {
+
+//         if (isOperator(char)) {
+//             // 比较优先级
+//             while (comparePriority(operatorStack.peek(), char)) {
+//                 var tmp = operatorStack.pop();
+//                 if (tmp !== '(' && tmp !== ')') {
+//                     postfixExp.push(tmp);
+//                 }
+//                 if (tmp === '(' && char === ')') { // 匹配到左括号的时候，结束循环。
+//                     break;
+//                 }
+//             }
+//             if (char !== ')') {
+//                 operatorStack.push(char);
+//             }
+//         } else {
+//             postfixExp.push(char);
+//         }
+//     });
+//     while (operatorStack.length()) {
+//         postfixExp.push(operatorStack.pop());
+//     }
+//     return postfixExp.join('');
+// }
+
+// function computePostfix(exp) {
+//     var numStack = new Stack();
+//     exp.split('').forEach(function (char) {
+//         if (char.trim()) {
+//             if (!isOperator(char)) {
+//                 numStack.push(char);
+//             } else {
+//                 var tmp = numStack.pop();
+//                 numStack.push(eval(numStack.pop() + char + tmp));
+//             }
+//         }
+//     });
+//     return numStack.pop();
+// }
+
+// var postfixExp = infixToPostfix('(8-2)/(3-1)*(9-6)');
+// var postfixExpValue = computePostfix(postfixExp);
+
+// console.log(postfixExp); // 82-31-/96-*
+// console.log(postfixExpValue); // 9
+
+// 3.佩兹糖果盒 不改变原有顺序 移除所有黄色糖果
+// 1:红 2：黄 3：白
+let arr = [1, 1, 1, 1, 3, 3, 2, 2, 2, 2, 1, 1, 3, 3, 1, 2, 3, 1, 3, 2]
+function remove(arr) {
+    let stack = new Stack();
+    let res = [];
+    for(let i = 0; i < arr.length; i ++) {
+        if(arr[i] !== 2) {
+            stack.push(arr[i]);
+        }
+    }
+    while (stack.length()) {
+        res.push(stack.pop());
+    }
+    return res.reverse();
+}
+console.log(remove(arr));
 
 
 
